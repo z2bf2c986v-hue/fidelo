@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "countries": {
+    "ES": { "enabled": true, "payments": { "cash": true, "card": true, "gateway": "none", "gatewayName": "" }, "cities": ["Madrid","Barcelona","Valencia","Sevilla","Málaga","Bilbao","Zaragoza","Granada","Alicante","Palma"], "rate": 10 },
+    "MA": { "enabled": true, "payments": { "cash": true, "card": true, "gateway": "none", "gatewayName": "" }, "cities": ["Casablanca","Rabat","Marrakech","Fès","Tanger","Agadir","Meknès","Oujda","Kénitra","Tétouan","Salé","Essaouira"], "rate": 1 },
+    "FR": { "enabled": true, "payments": { "cash": true, "card": true, "gateway": "none", "gatewayName": "" }, "cities": ["Paris","Marseille","Lyon","Toulouse","Nice","Nantes","Bordeaux","Lille","Strasbourg","Montpellier"], "rate": 10 }
+  }
+}

@@ -1,0 +1,1126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Fidelo: loyalty points for cafés and restaurants.">
+<link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIiB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcm9sZT0iaW1nIiBhcmlhLWxhYmVsPSJGaWRlbG8iPgogIDxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiByeD0iMTE2IiBmaWxsPSIjMEU2QjRFIi8+CiAgPGNpcmNsZSBjeD0iMjU2IiBjeT0iMjU2IiByPSIxNTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0ZGRkZGRiIgc3Ryb2tlLXdpZHRoPSIyOCIvPgogIDxwYXRoIGQ9Ik0xODQgMjYyIEwyMzggMzE2IEwzMzQgMjAyIiBmaWxsPSJub25lIiBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iMzAiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgogIDxjaXJjbGUgY3g9IjM2MiIgY3k9IjE1MCIgcj0iMjciIGZpbGw9IiNGMkI4M0EiLz4KPC9zdmc+Cg==">
+<style>:root{color-scheme:light}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Fidelo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=Inter:wght@400;500;600&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: welcome gate (country, role) then either a customer card or a staff dashboard; logical CSS properties so Arabic flips to RTL. */
+:root{
+  --bg:#F2F5F1; --surface:#FFFFFF; --surface2:#E6EDE8; --ink:#13231D; --muted:#576860;
+  --line:#D3DED6; --accent:#0E6B4E; --accent-ink:#FFFFFF; --gold:#D98E04; --gold-ink:#3B2800;
+  --bad:#B83A3A; --shadow:0 1px 2px rgba(19,35,29,.06),0 6px 18px rgba(19,35,29,.06);
+  --f-display:'Bricolage Grotesque','Noto Sans Arabic',system-ui,sans-serif;
+  --f-body:'Inter','Noto Sans Arabic',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0D1613; --surface:#14211C; --surface2:#1C2C26; --ink:#E7EFEA; --muted:#93A69C; --line:#26392F;
+    --accent:#42C99B; --accent-ink:#06231A; --gold:#F2B83A; --gold-ink:#2E2000; --bad:#EF7A7A;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.25); color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0D1613; --surface:#14211C; --surface2:#1C2C26; --ink:#E7EFEA; --muted:#93A69C; --line:#26392F;
+  --accent:#42C99B; --accent-ink:#06231A; --gold:#F2B83A; --gold-ink:#2E2000; --bad:#EF7A7A;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.25); color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 56px}
+:lang(ar) *{letter-spacing:0!important;text-transform:none!important}
+.wrap{max-width:1120px;margin:0 auto;display:flex;flex-direction:column;gap:20px;min-width:0}
+h1,h2,h3{font-family:var(--f-display);margin:0;line-height:1.2;text-wrap:balance}
+h1{font-size:clamp(28px,5vw,44px);font-weight:700}
+h2{font-size:18px}
+h3{font-size:16px}
+p{margin:0}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.muted,.sub,.hint{color:var(--muted)}
+.sub{font-size:13px}
+.hint{font-size:13px;min-height:20px}
+.num{font-variant-numeric:tabular-nums}
+
+/* header */
+.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand b{font-family:var(--f-display);font-size:20px;display:block;line-height:1.1}
+.brand small{color:var(--muted);font-size:12px;display:block}
+.mark{width:38px;height:38px;border-radius:12px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;flex:none}
+.ctrls{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.who{font-size:13px;color:var(--muted);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.seg{display:inline-flex;background:var(--surface2);border-radius:12px;padding:3px}
+.seg button{border:0;background:transparent;padding:8px 16px;border-radius:9px;cursor:pointer;font-weight:500;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+select,.in{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:9px 12px;min-width:0;max-width:100%}
+.langsel select{cursor:pointer}
+
+/* shared blocks */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:16px}
+.head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px}
+.btn{background:var(--accent);color:var(--accent-ink);border:0;border-radius:10px;padding:10px 16px;font-weight:600;cursor:pointer;text-align:center}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.sm{padding:6px 10px;font-size:13px}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.chip{display:inline-block;font-size:12px;font-weight:600;padding:2px 9px;border-radius:99px;background:var(--surface2);color:var(--muted);white-space:nowrap}
+.chip.item{background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--accent)}
+.chip.discount,.chip.gold{background:color-mix(in srgb,var(--gold) 22%,transparent);color:var(--gold)}
+label{font-size:13px;font-weight:600;display:block;margin-block-end:6px}
+form .field{display:flex;flex-direction:column;min-width:0}
+.field select,.field .in{width:100%}
+form{min-width:0}
+.empty{color:var(--muted);padding:14px 4px}
+.ferr{color:var(--bad);font-size:13px;margin-top:4px}
+.ferr:empty{display:none}
+.in[aria-invalid="true"],select[aria-invalid="true"]{border-color:var(--bad)}
+
+/* welcome and auth */
+.welcome{display:flex;flex-direction:column;gap:8px;padding-block:8px}
+.welcome p{max-width:60ch}
+.regs{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));gap:10px}
+.reg{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;text-align:start;cursor:pointer;display:flex;flex-direction:column;gap:2px}
+.reg span{font-size:13px;color:var(--muted)}
+.reg[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:color-mix(in srgb,var(--accent) 8%,var(--surface))}
+.role{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:22px;display:flex;align-items:center;justify-content:space-between;gap:14px;text-align:start;cursor:pointer;min-width:0}
+.role:hover{border-color:var(--accent)}
+.role h2{margin-bottom:4px}
+.role p{color:var(--muted)}
+.role svg{flex:none;color:var(--accent)}
+[dir="rtl"] .flip{transform:scaleX(-1)}
+.alt{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;color:var(--muted)}
+.auth{max-width:680px;width:100%}
+.formgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:14px}
+.pfx{display:flex;align-items:stretch}
+.pfx span{display:grid;place-items:center;padding:0 12px;background:var(--surface2);border:1px solid var(--line);border-inline-end:0;border-start-start-radius:10px;border-end-start-radius:10px;color:var(--muted);font-variant-numeric:tabular-nums}
+.pfx .in{border-start-start-radius:0;border-end-start-radius:0}
+.only{border:1px dashed var(--accent);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:14px;background:color-mix(in srgb,var(--accent) 6%,var(--surface))}
+.only h3{display:flex;align-items:center;gap:8px}
+.check{display:flex;gap:10px;align-items:flex-start;font-weight:400;font-size:14px}
+.check input{margin-top:4px;flex:none}
+.banner{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;background:color-mix(in srgb,var(--gold) 18%,var(--surface));border:1px solid var(--gold);border-radius:12px;padding:10px 14px}
+
+/* customer card */
+.card-hero{position:relative;overflow:hidden;background:var(--accent);color:var(--accent-ink);border-radius:22px;padding:24px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.card-hero::after{content:"";position:absolute;inset-inline-end:-70px;top:-70px;width:220px;height:220px;border-radius:50%;border:34px solid currentColor;opacity:.09;pointer-events:none}
+.ch-top{display:flex;justify-content:space-between;gap:10px;font-size:13px;opacity:.85}
+.ch-name{font-family:var(--f-display);font-size:22px;font-weight:600}
+.ch-pts{display:flex;align-items:baseline;gap:8px}
+.ch-pts .big{font-family:var(--f-display);font-weight:700;font-size:56px;line-height:1;font-variant-numeric:tabular-nums}
+.stamps{display:grid;grid-template-columns:repeat(10,1fr);gap:6px;max-width:420px}
+.stamps i{aspect-ratio:1;border-radius:50%;border:2px solid currentColor;opacity:.45}
+.stamps i.on{background:var(--gold);border-color:var(--gold);opacity:1}
+.ch-note{font-size:14px}
+.ch-rule{font-size:13px;opacity:.8}
+.rw-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,210px),1fr));gap:14px}
+.rw{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.rw.ok{border-color:var(--accent)}
+.rw-top{display:flex;gap:6px;flex-wrap:wrap;min-height:24px}
+.rw-cost b{font-family:var(--f-display);font-size:26px;font-variant-numeric:tabular-nums}
+.rw .btn{margin-top:auto}
+.vouch{display:flex;flex-direction:column;gap:6px;border:1px dashed var(--line);border-radius:12px;padding:12px}
+.vouch .code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:22px;font-weight:700;letter-spacing:.08em}
+.vouch .row{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.vouch.used{opacity:.6}
+.list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.list li{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
+.list li:last-child{border-bottom:0}
+.list .l{min-width:0}
+.list .r{text-align:end;flex:none}
+.pos{color:var(--accent);font-weight:600}
+.neg{color:var(--gold);font-weight:600}
+
+/* staff */
+.tabs{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line)}
+.tab{border:0;background:transparent;padding:11px 14px;border-bottom:2px solid transparent;color:var(--muted);cursor:pointer;white-space:nowrap;font-weight:500;margin-bottom:-1px}
+.tab[aria-selected="true"]{color:var(--ink);border-color:var(--accent)}
+.group-title{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:8px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));gap:12px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;min-width:0}
+.kpi .k{font-size:13px;color:var(--muted)}
+.kpi .v{font-family:var(--f-display);font-size:28px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.2;overflow-wrap:anywhere}
+.kpi .n{font-size:12px;color:var(--muted)}
+.kpi.main{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.kpi.main .k,.kpi.main .n{color:inherit;opacity:.85}
+.chart{display:grid;grid-template-columns:auto 1fr;column-gap:10px;row-gap:6px}
+.yax{display:flex;flex-direction:column;justify-content:space-between;height:170px;font-size:11px;color:var(--muted);text-align:end;font-variant-numeric:tabular-nums}
+.plot{height:170px;background:
+  linear-gradient(var(--line),var(--line)) top/100% 1px no-repeat,
+  linear-gradient(var(--line),var(--line)) center/100% 1px no-repeat,
+  linear-gradient(var(--line),var(--line)) bottom/100% 1px no-repeat}
+.cols{display:flex;align-items:flex-end;gap:2px;height:100%}
+.col{flex:1;height:100%;display:flex;align-items:flex-end;gap:1px;min-width:0}
+.col i{display:block;flex:1;background:var(--accent);border-radius:2px 2px 0 0}
+.col i.b{background:var(--gold)}
+.xax{grid-column:2;display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--muted)}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--accent);margin-inline-end:6px}
+.legend span.b::before{background:var(--gold)}
+.tablewrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:560px}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);text-align:start;font-weight:600;padding:8px 10px;border-bottom:1px solid var(--line)}
+td{padding:11px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+th.num,td.num{text-align:end}
+.bar{height:6px;border-radius:3px;background:var(--surface2);overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:var(--accent)}
+.row-form{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+.row-form .field{flex:1 1 180px}
+.in{width:100%}
+.in.sm{width:96px;padding:6px 8px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chips .btn{padding:6px 12px;font-size:13px}
+.foot{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;color:var(--muted);font-size:13px}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:11px 18px;border-radius:12px;font-weight:500;box-shadow:var(--shadow);max-width:min(92vw,460px);z-index:20}
+#toast.err{background:var(--bad);color:#fff}
+@media (max-width:520px){.ch-pts .big{font-size:46px}.card-hero{padding:20px}.role{padding:18px}}
+@media (prefers-reduced-motion:no-preference){.btn,.tab,.role,.reg{transition:background .15s,color .15s,border-color .15s}}
+#adminRoot *{box-sizing:border-box}
+#adminRoot{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 56px}
+#adminRoot .awrap{max-width:1120px;margin:0 auto;display:flex;flex-direction:column;gap:20px;min-width:0}
+#adminRoot h1,#adminRoot h2,#adminRoot h3{font-family:var(--f-display);margin:0;line-height:1.2;text-wrap:balance}
+#adminRoot h1{font-size:clamp(26px,4.5vw,38px)}
+#adminRoot h2{font-size:18px}
+#adminRoot p{margin:0}
+#adminRoot button,#adminRoot input,#adminRoot select,#adminRoot textarea{font:inherit;color:inherit}
+#adminRoot :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+#adminRoot .sub{font-size:13px;color:var(--muted)}
+#adminRoot .top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+#adminRoot .brand{display:flex;align-items:center;gap:10px}
+#adminRoot .mark{width:38px;height:38px;border-radius:12px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;flex:none}
+#adminRoot .brand b{font-family:var(--f-display);font-size:20px;line-height:1.1;display:block}
+#adminRoot .chip{display:inline-block;font-size:12px;font-weight:600;padding:2px 9px;border-radius:99px;background:color-mix(in srgb,var(--gold) 22%,transparent);color:var(--gold)}
+#adminRoot .panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+#adminRoot .head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px}
+#adminRoot .btn{background:var(--accent);color:var(--accent-ink);border:0;border-radius:10px;padding:10px 16px;font-weight:600;cursor:pointer;text-align:center;text-decoration:none;display:inline-block}
+#adminRoot .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+#adminRoot .btn.sm{padding:6px 10px;font-size:13px}
+#adminRoot .btn.danger{background:transparent;color:var(--bad);border:1px solid var(--bad)}
+#adminRoot label{font-size:13px;font-weight:600;display:block;margin-block-end:6px}
+#adminRoot .in,#adminRoot select,#adminRoot textarea{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:9px 12px;min-width:0;max-width:100%;width:100%}
+#adminRoot textarea{resize:vertical}
+#adminRoot .in[aria-invalid="true"]{border-color:var(--bad)}
+#adminRoot .formgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:14px}
+#adminRoot .field{display:flex;flex-direction:column;min-width:0}
+#adminRoot .tablewrap{overflow-x:auto}
+#adminRoot table{width:100%;border-collapse:collapse;min-width:760px}
+#adminRoot th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);text-align:start;font-weight:600;padding:8px 10px;border-bottom:1px solid var(--line)}
+#adminRoot td{padding:11px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+#adminRoot .tg{display:inline-flex;align-items:center;gap:8px;font-weight:500;font-size:14px;margin:0;cursor:pointer}
+#adminRoot .tg input{width:18px;height:18px;accent-color:var(--accent)}
+#adminRoot td select{width:auto;min-width:150px}
+#adminRoot .gw{display:flex;gap:8px;align-items:center}
+#adminRoot .gw .in{width:140px}
+#adminRoot .actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+#adminRoot .check{display:flex;gap:10px;align-items:center;font-weight:500}
+#adminRoot #json{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;min-height:220px}
+#adminRoot #adminToast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:11px 18px;border-radius:12px;font-weight:500;max-width:min(92vw,460px);z-index:20}
+#adminRoot #adminToast.err{background:var(--bad);color:#fff}
+#adminRoot .off{opacity:.55}
+#adminRoot{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;min-height:100vh}
+</style>
+
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<div id="adminRoot" hidden><div class="awrap" id="adminView"></div><div id="adminToast" role="status" aria-live="polite" hidden></div></div>
+<div id="toast" role="status" aria-live="polite" hidden></div>
+
+<script>
+(function(){
+'use strict';
+var DAY=864e5;
+var LANGS={en:'English',fr:'Français',es:'Español',ar:'العربية'};
+var LOC={en:'en-GB',fr:'fr-FR',es:'es-ES',ar:'ar-u-nu-latn'};
+
+/* ---------- country rules ---------- */
+var REG={
+  ES:{enabled:true,pay:{cash:true,card:true,gateway:'none',gatewayName:''},cur:'EUR',cc:'+34',name:{en:'Spain',fr:'Espagne',es:'España',ar:'إسبانيا'},phoneRe:/^(?:\+34|0034)?[6-9]\d{8}$/,phoneEx:'612 345 678',
+    cities:['Madrid','Barcelona','Valencia','Sevilla','Málaga','Bilbao','Zaragoza','Granada','Alicante','Palma'],
+    rate:10,scale:1,step:0.5,target:1500,sample:'24.50',rw:[[400,2.5],[600,5],[900,5],[1400,14],[1700,10],[3000,28]],
+    names:['Lucía Fernández','Pablo Navarro','Carmen Ortega','Sofía Marín','Marta Gil','Elena Ruiz','Javier Molina','Paula Sánchez','Diego Herrera','Irene Castro','Álvaro Vega','Nuria Prieto','Daniel Cano','Laura Soler'],
+    demoVenue:{name:'Bar Mercado',type:'cafe',email:'hola@barmercado.example',phone:'+34 910 123 456',address:'Calle Mayor 12',city:'Madrid'}},
+  MA:{enabled:true,pay:{cash:true,card:true,gateway:'none',gatewayName:''},cur:'MAD',cc:'+212',name:{en:'Morocco',fr:'Maroc',es:'Marruecos',ar:'المغرب'},phoneRe:/^(?:\+212|00212|0)?[5-7]\d{8}$/,phoneEx:'612 345 678',
+    cities:['Casablanca','Rabat','Marrakech','Fès','Tanger','Agadir','Meknès','Oujda','Kénitra','Tétouan','Salé','Essaouira'],
+    rate:1,scale:7,step:5,target:1100,sample:'120',rw:[[200,12],[400,30],[700,50],[1100,80],[1400,100],[2400,160]],
+    names:['Youssef El Idrissi','Salma Benkirane','Mehdi Benali','Imane Alaoui','Karim Haddad','Nadia Tazi','Omar Saidi','Hajar Lahlou','Amine Bennani','Laila Mansour','Reda Cherkaoui','Zineb Fassi','Anas Berrada','Meryem Kettani'],
+    demoVenue:{name:'Café Atlas',type:'cafe',email:'contact@cafeatlas.example',phone:'+212 522 123 456',address:'Avenue Mohammed V, 25',city:'Casablanca'}},
+  FR:{enabled:true,pay:{cash:true,card:true,gateway:'none',gatewayName:''},cur:'EUR',cc:'+33',name:{en:'France',fr:'France',es:'Francia',ar:'فرنسا'},phoneRe:/^(?:\+33|0033|0)?[1-9]\d{8}$/,phoneEx:'6 12 34 56 78',
+    cities:['Paris','Marseille','Lyon','Toulouse','Nice','Nantes','Bordeaux','Lille','Strasbourg','Montpellier'],
+    rate:10,scale:1,step:0.5,target:1500,sample:'24.50',rw:[[400,2.5],[600,5],[900,5],[1400,14],[1700,10],[3000,28]],
+    names:['Camille Laurent','Inès Moreau','Antoine Girard','Léa Fontaine','Hugo Bernard','Manon Lefèvre','Julien Roux','Chloé Petit','Nicolas Garnier','Sarah Benali','Thomas Mercier','Emma Faure','Lucas Blanc','Clara Dubois'],
+    demoVenue:{name:'Brasserie Lumière',type:'restaurant',email:'bonjour@brasserielumiere.example',phone:'+33 1 42 00 12 34',address:'12 rue de Rivoli',city:'Paris'}}
+};
+
+
+var GATEWAYS=[['none','No gateway'],['stripe','Stripe'],['adyen','Adyen'],['checkoutcom','Checkout.com'],['paypal','PayPal'],['mollie','Mollie'],['worldline','Worldline'],['redsys','Redsys'],['payplug','PayPlug'],['cmi','CMI'],['payzone','Payzone'],['other','Other']];
+function gatewayLabel(pay){if(!pay||!pay.gateway||pay.gateway==='none')return '';if(pay.gateway==='other')return pay.gatewayName||'';var g=GATEWAYS.filter(function(x){return x[0]===pay.gateway})[0];return g?g[1]:''}
+function normPay(p){p=p||{};var o={cash:p.cash!==false,card:p.card!==false,gateway:String(p.gateway||'none').slice(0,20),gatewayName:String(p.gatewayName||'').slice(0,40)};if(!o.cash&&!o.card)o.cash=true;return o}
+var GENERIC_NAMES=['Alex Martin','Sam Rivera','Noor Haddad','Jordan Lee','Maya Costa','Ravi Patel','Lina Novak','Omar Diaz','Eva Berg','Tariq Sahin','Nina Rossi','Leo Moreau','Ines Duarte','Adam Klein'];
+function mkCountry(code,c){
+  var coffee=parseFloat(c.coffee)>0?parseFloat(c.coffee):2.5,fx=coffee/2.5;
+  var step=fx>=4?5:0.5,mult=[16,12,18,10,17,10.7],base=[2.5,5,5,14,10,28];
+  var rate=Math.max(1,parseFloat(c.rate)||1);
+  var vals=base.map(function(v,i){return i===0?coffee:Math.max(step,Math.round(v*fx/step)*step)});
+  var costs=vals.map(function(v,i){return Math.max(10,Math.round(v*rate*mult[i]/10)*10)});
+  var len=Math.min(12,Math.max(6,parseInt(c.phoneLen,10)||9));
+  var first=/^[0-9-]+$/.test(String(c.phoneFirst||''))&&c.phoneFirst?'['+c.phoneFirst+']':'\\d';
+  var ccd=String(c.cc).replace('+','');
+  var cities=Array.isArray(c.cities)&&c.cities.length?c.cities.slice(0,50).map(String):['-'];
+  var nm=c.name&&typeof c.name==='object'?c.name:{en:code};
+  return {enabled:c.enabled!==false,custom:true,pay:normPay(c.payments),cur:c.cur,cc:c.cc,name:nm,
+    phoneRe:new RegExp('^(?:\\+'+ccd+'|00'+ccd+'|0)?'+first+'\\d{'+(len-1)+'}$'),phoneLen:len,phoneEx:String(c.phoneEx||''),
+    cities:cities,rate:rate,scale:fx*1.46,step:step,target:Math.round(costs[4]*0.9/10)*10,sample:String(Math.round(25*fx)),
+    rw:vals.map(function(v,i){return [costs[i],v]}),names:GENERIC_NAMES,
+    demoVenue:{name:'Café Demo',type:'cafe',email:'demo@example.com',phone:c.cc+' 000 000 000',address:'Main street 1',city:cities[0]}};
+}
+function applyConfig(cfg){
+  if(!cfg||typeof cfg!=='object'||!cfg.countries)return;
+  Object.keys(cfg.countries).forEach(function(code){
+    var c=cfg.countries[code];if(!c||typeof c!=='object'||!/^[A-Z]{2}$/.test(code))return;
+    if(c.custom){
+      if(!/^[A-Z]{3}$/.test(String(c.cur))||!/^\+\d{1,4}$/.test(String(c.cc)))return;
+      try{new Intl.NumberFormat('en',{style:'currency',currency:c.cur})}catch(e){return}
+      REG[code]=mkCountry(code,c);
+    }else if(REG[code]){
+      var r=REG[code];
+      if(typeof c.enabled==='boolean')r.enabled=c.enabled;
+      if(c.payments)r.pay=normPay(c.payments);
+      if(Array.isArray(c.cities)&&c.cities.length)r.cities=c.cities.slice(0,50).map(String);
+      if(parseFloat(c.rate)>0)r.rate=parseFloat(c.rate);
+    }
+  });
+}
+function enabledKeys(){var ks=Object.keys(REG).filter(function(k){return REG[k].enabled!==false});if(!ks.length){REG.ES.enabled=true;ks=['ES']}return ks}
+function curName(c){try{return new Intl.DisplayNames([lang],{type:'currency'}).of(c)||c}catch(e){return c}}
+function loadConfig(){
+  try{var d=JSON.parse(localStorage.getItem('fidelo.admin.draft')||'null');if(d&&d.countries)return Promise.resolve(d)}catch(e){}
+  if(!window.fetch)return Promise.resolve(null);
+  return fetch('config.json',{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).catch(function(){return null});
+}
+
+var T={
+en:{tagline:'Loyalty for cafés and restaurants',language:'Language',
+welcomeTitle:'Welcome to Fidelo',welcomeSub:'Collect points at your favourite cafés and restaurants, or run a loyalty programme for your own.',
+chooseCountry:'Where are you?',curMAD:'Moroccan dirham',curEUR:'Euro',
+iamCustomer:'I’m a customer',iamCustomerSub:'Collect points and redeem rewards.',iamBusiness:'I run a business',iamBusinessSub:'Set up and manage your loyalty programme.',
+haveAccount:'Already have an account?',signIn:'Sign in',signOut:'Sign out',tryDemo:'Or try a demo',demoCustomer:'Demo as customer',demoBusiness:'Demo as business',back:'Back',changeCountry:'Change',country:'Country',
+createCustomer:'Create your customer account',createBusiness:'Register your business',email:'Email',proEmail:'Professional email',city:'City',address:'Street address',
+bizName:'Business name',bizType:'Type of business',tCafe:'Café',tRestaurant:'Restaurant',tBakery:'Bakery',tOther:'Other',
+bizOnly:'Your loyalty programme',
+consentCustomer:'I agree that my details are used to run my loyalty account.',consentBusiness:'I confirm I am authorised to register this business.',
+createAccount:'Create account',registerBtn:'Register business',
+errEmailUsed:'An account with this email already exists. Sign in instead.',errPhone:'Enter a valid phone number, for example {ex}.',errNoAccount:'No account found with this email.',
+errBizExists:'This prototype supports one business per country in this browser, and one is already registered here. Sign in with its email.',
+previewBanner:'Previewing a customer card',backToDash:'Back to dashboard',
+emptyOverview:'No sales yet. Record the first one in the Till tab.',goTill:'Open Till',emptyCustomers:'No customers yet. Add one in the Customers tab, or let customers sign up themselves.',goCustomers:'Open Customers',payCash:'Cash',payCard:'Card',payMethod:'Payment method',cashSales:'Cash sales',cardSales:'Card sales',shareOfSales:'{p} of sales',
+memberId:'Member',yourPoints:'Your points',pts:'pts',
+earnRule:'Earn {rate} points for every {unit} you spend.',toNext:'{n} points to go for: {name}',allDone:'You can unlock every reward.',stampsLabel:'Progress to the next reward',
+rewardsTitle:'Rewards',rewardsSub:'Spend your points on free dishes or money off your bill.',redeem:'Redeem',needMore:'{n} more pts',typeItem:'Free item',typeDiscount:'Bill discount',discountOff:'{v} off your bill',featured:'Best value',
+vouchersTitle:'My vouchers',noVouchers:'Redeem a reward and its code will appear here.',voucherReady:'Ready to use',voucherUsed:'Used',showCode:'Show this code at the till.',
+historyTitle:'History',noHistory:'No activity yet.',earned:'Earned',redeemed:'Redeemed',billOf:'Bill of {amount}',redeemedOk:'{name} redeemed. Code {code}.',notEnough:'Not enough points.',
+overview:'Overview',customers:'Customers',activity:'Activity',till:'Till',rewardsTab:'Rewards & rules',last7:'Last 7 days',last30:'Last 30 days',
+revenueGroup:'Sales and revenue',pointsGroup:'Points',grossSales:'Gross sales',netRevenue:'Net revenue',avgTicket:'Average bill',activeCustomers:'Active customers',
+pointsIssued:'Points issued',pointsRedeemed:'Points redeemed',redemptionRate:'Redemption rate',rewardsGiven:'Rewards given',netNote:'After {d} in bill discounts',
+chartSales:'Daily sales',chartPoints:'Points issued and redeemed',topCustomers:'Top customers',recent:'Recent activity',seeAll:'See all',
+searchPh:'Search by name or phone',addCustomer:'Add a customer',fullName:'Full name',phone:'Phone',add:'Add',
+colCustomer:'Customer',colPoints:'Points',colVisits:'Visits',colSpent:'Spent',colLast:'Last visit',viewAs:'Open card',noResults:'No customers match.',
+filterAll:'All',filterEarned:'Earned',filterRedeemed:'Redeemed',evEarn:'{name} earned {n} pts on a {amount} bill',evRedeem:'{name} redeemed {reward} (−{n} pts)',viaApp:'In the app',atTill:'At the till',
+recordSale:'Record a sale',customerLabel:'Customer',chooseCustomer:'Choose a customer',billAmount:'Bill amount ({sym})',willEarn:'Will earn {n} points',record:'Record sale',saleOk:'{n} points added to {name}.',
+redeemForCustomer:'Redeem for a customer',chooseReward:'Choose a reward',balanceIs:'Balance: {n} pts',redeemNow:'Redeem now',
+validateTitle:'Validate a voucher',voucherCode:'Voucher code',validate:'Validate',vOk:'Valid. {reward} for {name} is now marked as used.',vUsed:'This voucher was already used.',vNone:'No voucher with that code.',
+rulesTitle:'Points rule',rateLabel:'Points per {unit} spent',rewardsCatalog:'Reward catalogue',colReward:'Reward',colType:'Type',colCost:'Cost (pts)',colValue:'Value ({sym})',colActive:'Active',
+newReward:'New reward',rewardName:'Reward name',typeLabel:'Type',cost:'Cost (pts)',value:'Value ({sym})',saved:'Saved.',added:'Added.',
+reset:'Reset demo data',resetConfirm:'Click again to confirm',chooseFirst:'Choose a customer first.',invalidAmount:'Enter a bill amount.',custAdded:'Customer added.'},
+fr:{tagline:'La fidélité pour cafés et restaurants',language:'Langue',
+welcomeTitle:'Bienvenue sur Fidelo',welcomeSub:'Cumulez des points dans vos cafés et restaurants préférés, ou gérez le programme de fidélité du vôtre.',
+chooseCountry:'Où vous trouvez-vous ?',curMAD:'Dirham marocain',curEUR:'Euro',
+iamCustomer:'Je suis client',iamCustomerSub:'Cumulez des points et échangez des récompenses.',iamBusiness:'Je gère un établissement',iamBusinessSub:'Créez et gérez votre programme de fidélité.',
+haveAccount:'Vous avez déjà un compte ?',signIn:'Se connecter',signOut:'Se déconnecter',tryDemo:'Ou essayez une démo',demoCustomer:'Démo client',demoBusiness:'Démo établissement',back:'Retour',changeCountry:'Modifier',country:'Pays',
+createCustomer:'Créez votre compte client',createBusiness:'Enregistrez votre établissement',email:'E-mail',proEmail:'E-mail professionnel',city:'Ville',address:'Adresse',
+bizName:'Nom de l’établissement',bizType:'Type d’établissement',tCafe:'Café',tRestaurant:'Restaurant',tBakery:'Boulangerie',tOther:'Autre',
+bizOnly:'Votre programme de fidélité',
+consentCustomer:'J’accepte que mes données servent à gérer mon compte de fidélité.',consentBusiness:'Je confirme être autorisé(e) à enregistrer cet établissement.',
+createAccount:'Créer le compte',registerBtn:'Enregistrer l’établissement',
+errEmailUsed:'Un compte existe déjà avec cet e-mail. Connectez-vous.',errPhone:'Saisissez un numéro valide, par exemple {ex}.',errNoAccount:'Aucun compte trouvé avec cet e-mail.',
+errBizExists:'Ce prototype gère un seul établissement par pays dans ce navigateur, et il y en a déjà un ici. Connectez-vous avec son e-mail.',
+previewBanner:'Aperçu d’une carte client',backToDash:'Retour au tableau de bord',
+emptyOverview:'Aucune vente pour le moment. Enregistrez la première dans l’onglet Caisse.',goTill:'Ouvrir la caisse',emptyCustomers:'Aucun client pour le moment. Ajoutez-en un dans l’onglet Clients, ou laissez vos clients s’inscrire eux-mêmes.',goCustomers:'Ouvrir Clients',payCash:'Espèces',payCard:'Carte',payMethod:'Moyen de paiement',cashSales:'Ventes en espèces',cardSales:'Ventes par carte',shareOfSales:'{p} des ventes',
+memberId:'Membre',yourPoints:'Vos points',pts:'pts',
+earnRule:'Gagnez {rate} points pour chaque {unit} dépensé.',toNext:'Encore {n} points pour : {name}',allDone:'Vous pouvez débloquer toutes les récompenses.',stampsLabel:'Progression vers la prochaine récompense',
+rewardsTitle:'Récompenses',rewardsSub:'Échangez vos points contre des plats offerts ou une réduction sur l’addition.',redeem:'Échanger',needMore:'Encore {n} pts',typeItem:'Article offert',typeDiscount:'Réduction sur l’addition',discountOff:'{v} de réduction sur l’addition',featured:'Meilleur rapport',
+vouchersTitle:'Mes bons',noVouchers:'Échangez une récompense et son code apparaîtra ici.',voucherReady:'Prêt à l’emploi',voucherUsed:'Utilisé',showCode:'Présentez ce code en caisse.',
+historyTitle:'Historique',noHistory:'Aucune activité pour le moment.',earned:'Gagnés',redeemed:'Échangés',billOf:'Addition de {amount}',redeemedOk:'{name} échangé. Code {code}.',notEnough:'Points insuffisants.',
+overview:'Aperçu',customers:'Clients',activity:'Activité',till:'Caisse',rewardsTab:'Récompenses et règles',last7:'7 derniers jours',last30:'30 derniers jours',
+revenueGroup:'Ventes et chiffre d’affaires',pointsGroup:'Points',grossSales:'Ventes brutes',netRevenue:'Chiffre d’affaires net',avgTicket:'Addition moyenne',activeCustomers:'Clients actifs',
+pointsIssued:'Points émis',pointsRedeemed:'Points échangés',redemptionRate:'Taux d’échange',rewardsGiven:'Récompenses offertes',netNote:'Après {d} de réductions',
+chartSales:'Ventes par jour',chartPoints:'Points émis et échangés',topCustomers:'Meilleurs clients',recent:'Activité récente',seeAll:'Tout voir',
+searchPh:'Rechercher par nom ou téléphone',addCustomer:'Ajouter un client',fullName:'Nom complet',phone:'Téléphone',add:'Ajouter',
+colCustomer:'Client',colPoints:'Points',colVisits:'Visites',colSpent:'Dépensé',colLast:'Dernière visite',viewAs:'Ouvrir la carte',noResults:'Aucun client trouvé.',
+filterAll:'Tout',filterEarned:'Gagnés',filterRedeemed:'Échangés',evEarn:'{name} a gagné {n} pts sur une addition de {amount}',evRedeem:'{name} a échangé : {reward} (−{n} pts)',viaApp:'Dans l’appli',atTill:'En caisse',
+recordSale:'Enregistrer une vente',customerLabel:'Client',chooseCustomer:'Choisir un client',billAmount:'Montant de l’addition ({sym})',willEarn:'Gagnera {n} points',record:'Enregistrer la vente',saleOk:'{n} points ajoutés à {name}.',
+redeemForCustomer:'Échanger pour un client',chooseReward:'Choisir une récompense',balanceIs:'Solde : {n} pts',redeemNow:'Échanger maintenant',
+validateTitle:'Valider un bon',voucherCode:'Code du bon',validate:'Valider',vOk:'Valide. {reward} pour {name} est marqué comme utilisé.',vUsed:'Ce bon a déjà été utilisé.',vNone:'Aucun bon avec ce code.',
+rulesTitle:'Règle des points',rateLabel:'Points par {unit} dépensé',rewardsCatalog:'Catalogue de récompenses',colReward:'Récompense',colType:'Type',colCost:'Coût (pts)',colValue:'Valeur ({sym})',colActive:'Active',
+newReward:'Nouvelle récompense',rewardName:'Nom de la récompense',typeLabel:'Type',cost:'Coût (pts)',value:'Valeur ({sym})',saved:'Enregistré.',added:'Ajoutée.',
+reset:'Réinitialiser les données de démo',resetConfirm:'Cliquez à nouveau pour confirmer',chooseFirst:'Choisissez d’abord un client.',invalidAmount:'Saisissez le montant de l’addition.',custAdded:'Client ajouté.'},
+es:{tagline:'Fidelización para cafés y restaurantes',language:'Idioma',
+welcomeTitle:'Bienvenido a Fidelo',welcomeSub:'Acumula puntos en tus cafés y restaurantes favoritos, o gestiona el programa de fidelidad del tuyo.',
+chooseCountry:'¿Dónde estás?',curMAD:'Dírham marroquí',curEUR:'Euro',
+iamCustomer:'Soy cliente',iamCustomerSub:'Acumula puntos y canjea recompensas.',iamBusiness:'Tengo un negocio',iamBusinessSub:'Crea y gestiona tu programa de fidelidad.',
+haveAccount:'¿Ya tienes cuenta?',signIn:'Iniciar sesión',signOut:'Cerrar sesión',tryDemo:'O prueba una demo',demoCustomer:'Demo como cliente',demoBusiness:'Demo como negocio',back:'Atrás',changeCountry:'Cambiar',country:'País',
+createCustomer:'Crea tu cuenta de cliente',createBusiness:'Registra tu negocio',email:'Correo electrónico',proEmail:'Correo profesional',city:'Ciudad',address:'Dirección',
+bizName:'Nombre del negocio',bizType:'Tipo de negocio',tCafe:'Cafetería',tRestaurant:'Restaurante',tBakery:'Panadería',tOther:'Otro',
+bizOnly:'Tu programa de fidelidad',
+consentCustomer:'Acepto que mis datos se usen para gestionar mi cuenta de fidelidad.',consentBusiness:'Confirmo que estoy autorizado/a para registrar este negocio.',
+createAccount:'Crear cuenta',registerBtn:'Registrar negocio',
+errEmailUsed:'Ya existe una cuenta con este correo. Inicia sesión.',errPhone:'Introduce un teléfono válido, por ejemplo {ex}.',errNoAccount:'No hay ninguna cuenta con este correo.',
+errBizExists:'Este prototipo admite un negocio por país en este navegador, y ya hay uno registrado aquí. Inicia sesión con su correo.',
+previewBanner:'Vista previa de una tarjeta de cliente',backToDash:'Volver al panel',
+emptyOverview:'Aún no hay ventas. Registra la primera en la pestaña Caja.',goTill:'Abrir caja',emptyCustomers:'Aún no hay clientes. Añade uno en la pestaña Clientes o deja que se registren ellos mismos.',goCustomers:'Abrir Clientes',payCash:'Efectivo',payCard:'Tarjeta',payMethod:'Método de pago',cashSales:'Ventas en efectivo',cardSales:'Ventas con tarjeta',shareOfSales:'{p} de las ventas',
+memberId:'Socio',yourPoints:'Tus puntos',pts:'pts',
+earnRule:'Gana {rate} puntos por cada {unit} que gastes.',toNext:'Te faltan {n} puntos para: {name}',allDone:'Puedes desbloquear todas las recompensas.',stampsLabel:'Progreso hacia la próxima recompensa',
+rewardsTitle:'Recompensas',rewardsSub:'Canjea tus puntos por platos gratis o descuentos en la cuenta.',redeem:'Canjear',needMore:'Faltan {n} pts',typeItem:'Artículo gratis',typeDiscount:'Descuento en la cuenta',discountOff:'{v} de descuento en tu cuenta',featured:'Mejor valor',
+vouchersTitle:'Mis vales',noVouchers:'Canjea una recompensa y su código aparecerá aquí.',voucherReady:'Listo para usar',voucherUsed:'Usado',showCode:'Muestra este código en caja.',
+historyTitle:'Historial',noHistory:'Aún no hay actividad.',earned:'Ganados',redeemed:'Canjeados',billOf:'Cuenta de {amount}',redeemedOk:'{name} canjeado. Código {code}.',notEnough:'Puntos insuficientes.',
+overview:'Resumen',customers:'Clientes',activity:'Actividad',till:'Caja',rewardsTab:'Recompensas y reglas',last7:'Últimos 7 días',last30:'Últimos 30 días',
+revenueGroup:'Ventas e ingresos',pointsGroup:'Puntos',grossSales:'Ventas brutas',netRevenue:'Ingresos netos',avgTicket:'Ticket medio',activeCustomers:'Clientes activos',
+pointsIssued:'Puntos emitidos',pointsRedeemed:'Puntos canjeados',redemptionRate:'Tasa de canje',rewardsGiven:'Recompensas entregadas',netNote:'Tras {d} en descuentos',
+chartSales:'Ventas diarias',chartPoints:'Puntos emitidos y canjeados',topCustomers:'Mejores clientes',recent:'Actividad reciente',seeAll:'Ver todo',
+searchPh:'Buscar por nombre o teléfono',addCustomer:'Añadir cliente',fullName:'Nombre completo',phone:'Teléfono',add:'Añadir',
+colCustomer:'Cliente',colPoints:'Puntos',colVisits:'Visitas',colSpent:'Gastado',colLast:'Última visita',viewAs:'Abrir tarjeta',noResults:'Ningún cliente coincide.',
+filterAll:'Todo',filterEarned:'Ganados',filterRedeemed:'Canjeados',evEarn:'{name} ganó {n} pts en una cuenta de {amount}',evRedeem:'{name} canjeó {reward} (−{n} pts)',viaApp:'En la app',atTill:'En caja',
+recordSale:'Registrar una venta',customerLabel:'Cliente',chooseCustomer:'Elige un cliente',billAmount:'Importe de la cuenta ({sym})',willEarn:'Ganará {n} puntos',record:'Registrar venta',saleOk:'{n} puntos añadidos a {name}.',
+redeemForCustomer:'Canjear para un cliente',chooseReward:'Elige una recompensa',balanceIs:'Saldo: {n} pts',redeemNow:'Canjear ahora',
+validateTitle:'Validar un vale',voucherCode:'Código del vale',validate:'Validar',vOk:'Válido. {reward} para {name} queda marcado como usado.',vUsed:'Este vale ya se usó.',vNone:'No hay ningún vale con ese código.',
+rulesTitle:'Regla de puntos',rateLabel:'Puntos por cada {unit} gastado',rewardsCatalog:'Catálogo de recompensas',colReward:'Recompensa',colType:'Tipo',colCost:'Coste (pts)',colValue:'Valor ({sym})',colActive:'Activa',
+newReward:'Nueva recompensa',rewardName:'Nombre de la recompensa',typeLabel:'Tipo',cost:'Coste (pts)',value:'Valor ({sym})',saved:'Guardado.',added:'Añadida.',
+reset:'Restablecer datos de demostración',resetConfirm:'Pulsa de nuevo para confirmar',chooseFirst:'Elige primero un cliente.',invalidAmount:'Introduce el importe de la cuenta.',custAdded:'Cliente añadido.'},
+ar:{tagline:'برنامج ولاء للمقاهي والمطاعم',language:'اللغة',
+welcomeTitle:'مرحبًا بك في Fidelo',welcomeSub:'اجمع النقاط في مقاهيك ومطاعمك المفضلة، أو أدِر برنامج الولاء الخاص بمقهاك أو مطعمك.',
+chooseCountry:'أين أنت؟',curMAD:'الدرهم المغربي',curEUR:'اليورو',
+iamCustomer:'أنا عميل',iamCustomerSub:'اجمع النقاط واستبدل المكافآت.',iamBusiness:'أملك نشاطًا تجاريًا',iamBusinessSub:'أنشئ برنامج الولاء الخاص بك وأدِره.',
+haveAccount:'لديك حساب بالفعل؟',signIn:'تسجيل الدخول',signOut:'تسجيل الخروج',tryDemo:'أو جرّب نسخة تجريبية',demoCustomer:'تجربة كعميل',demoBusiness:'تجربة كنشاط تجاري',back:'رجوع',changeCountry:'تغيير',country:'البلد',
+createCustomer:'أنشئ حساب العميل',createBusiness:'سجّل نشاطك التجاري',email:'البريد الإلكتروني',proEmail:'البريد الإلكتروني المهني',city:'المدينة',address:'العنوان',
+bizName:'اسم النشاط التجاري',bizType:'نوع النشاط',tCafe:'مقهى',tRestaurant:'مطعم',tBakery:'مخبزة',tOther:'أخرى',
+bizOnly:'برنامج الولاء الخاص بك',
+consentCustomer:'أوافق على استخدام بياناتي لإدارة حساب الولاء الخاص بي.',consentBusiness:'أؤكد أنني مخوّل بتسجيل هذا النشاط التجاري.',
+createAccount:'إنشاء الحساب',registerBtn:'تسجيل النشاط',
+errEmailUsed:'يوجد حساب بهذا البريد بالفعل. سجّل الدخول.',errPhone:'أدخل رقم هاتف صالحًا، مثل {ex}.',errNoAccount:'لا يوجد حساب بهذا البريد.',
+errBizExists:'يدعم هذا النموذج الأولي نشاطًا تجاريًا واحدًا لكل بلد في هذا المتصفح، ويوجد نشاط مسجّل هنا بالفعل. سجّل الدخول ببريده.',
+previewBanner:'معاينة بطاقة عميل',backToDash:'العودة إلى لوحة التحكم',
+emptyOverview:'لا توجد مبيعات بعد. سجّل أول عملية في تبويب الصندوق.',goTill:'فتح الصندوق',emptyCustomers:'لا يوجد عملاء بعد. أضف عميلًا من تبويب العملاء، أو دعهم يسجّلون بأنفسهم.',goCustomers:'فتح العملاء',payCash:'نقدًا',payCard:'بطاقة',payMethod:'طريقة الدفع',cashSales:'المبيعات النقدية',cardSales:'مبيعات البطاقات',shareOfSales:'{p} من المبيعات',
+memberId:'عضو',yourPoints:'نقاطك',pts:'نقطة',
+earnRule:'اكسب {rate} نقاط عن كل {unit} تنفقه.',toNext:'تبقّى {n} نقطة للحصول على: {name}',allDone:'يمكنك الآن فتح جميع المكافآت.',stampsLabel:'التقدّم نحو المكافأة التالية',
+rewardsTitle:'المكافآت',rewardsSub:'استبدل نقاطك بأطباق مجانية أو خصم على فاتورتك.',redeem:'استبدال',needMore:'تبقّى {n} نقطة',typeItem:'عنصر مجاني',typeDiscount:'خصم على الفاتورة',discountOff:'خصم {v} على فاتورتك',featured:'الأفضل قيمة',
+vouchersTitle:'قسائمي',noVouchers:'استبدل مكافأة وسيظهر رمزها هنا.',voucherReady:'جاهزة للاستخدام',voucherUsed:'مستخدمة',showCode:'اعرض هذا الرمز عند الدفع.',
+historyTitle:'السجل',noHistory:'لا يوجد نشاط بعد.',earned:'مكتسبة',redeemed:'مستبدلة',billOf:'فاتورة بقيمة {amount}',redeemedOk:'تم استبدال {name}. الرمز {code}.',notEnough:'النقاط غير كافية.',
+overview:'نظرة عامة',customers:'العملاء',activity:'النشاط',till:'الصندوق',rewardsTab:'المكافآت والقواعد',last7:'آخر 7 أيام',last30:'آخر 30 يومًا',
+revenueGroup:'المبيعات والإيرادات',pointsGroup:'النقاط',grossSales:'إجمالي المبيعات',netRevenue:'صافي الإيرادات',avgTicket:'متوسط الفاتورة',activeCustomers:'العملاء النشطون',
+pointsIssued:'النقاط الممنوحة',pointsRedeemed:'النقاط المستبدلة',redemptionRate:'نسبة الاستبدال',rewardsGiven:'المكافآت الممنوحة',netNote:'بعد خصومات بقيمة {d}',
+chartSales:'المبيعات اليومية',chartPoints:'النقاط الممنوحة والمستبدلة',topCustomers:'أفضل العملاء',recent:'آخر الأنشطة',seeAll:'عرض الكل',
+searchPh:'ابحث بالاسم أو الهاتف',addCustomer:'إضافة عميل',fullName:'الاسم الكامل',phone:'الهاتف',add:'إضافة',
+colCustomer:'العميل',colPoints:'النقاط',colVisits:'الزيارات',colSpent:'المنفَق',colLast:'آخر زيارة',viewAs:'فتح البطاقة',noResults:'لا يوجد عملاء مطابقون.',
+filterAll:'الكل',filterEarned:'المكتسبة',filterRedeemed:'المستبدلة',evEarn:'اكتسب {name} {n} نقطة على فاتورة بقيمة {amount}',evRedeem:'استبدل {name} مكافأة {reward} (−{n} نقطة)',viaApp:'عبر التطبيق',atTill:'عند الصندوق',
+recordSale:'تسجيل عملية بيع',customerLabel:'العميل',chooseCustomer:'اختر عميلًا',billAmount:'قيمة الفاتورة ({sym})',willEarn:'سيكسب {n} نقطة',record:'تسجيل البيع',saleOk:'أُضيفت {n} نقطة إلى {name}.',
+redeemForCustomer:'استبدال لصالح عميل',chooseReward:'اختر مكافأة',balanceIs:'الرصيد: {n} نقطة',redeemNow:'استبدل الآن',
+validateTitle:'التحقق من قسيمة',voucherCode:'رمز القسيمة',validate:'تحقق',vOk:'صالحة. تم تحديد {reward} للعميل {name} كمستخدمة.',vUsed:'تم استخدام هذه القسيمة من قبل.',vNone:'لا توجد قسيمة بهذا الرمز.',
+rulesTitle:'قاعدة النقاط',rateLabel:'النقاط لكل {unit} يُنفَق',rewardsCatalog:'كتالوج المكافآت',colReward:'المكافأة',colType:'النوع',colCost:'التكلفة (نقاط)',colValue:'القيمة ({sym})',colActive:'مفعّلة',
+newReward:'مكافأة جديدة',rewardName:'اسم المكافأة',typeLabel:'النوع',cost:'التكلفة (نقاط)',value:'القيمة ({sym})',saved:'تم الحفظ.',added:'تمت الإضافة.',
+reset:'إعادة ضبط بيانات العرض',resetConfirm:'اضغط مرة أخرى للتأكيد',chooseFirst:'اختر عميلًا أولًا.',invalidAmount:'أدخل قيمة الفاتورة.',custAdded:'تمت إضافة العميل.'}
+};
+
+var LU='fidelo.ui.v2';
+var $=function(s){return document.querySelector(s)};
+var esc=function(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
+function guessRegion(){try{var z=Intl.DateTimeFormat().resolvedOptions().timeZone||'';if(/Casablanca/.test(z))return 'MA';if(/Paris/.test(z))return 'FR'}catch(e){}return 'ES'}
+
+var ui={screen:'welcome',tab:'overview',period:7,search:'',actFilter:'all',confirmReset:false,region:guessRegion(),sess:null,preview:null};
+var lang='en',S=null;
+try{var u=JSON.parse(localStorage.getItem(LU)||'null');
+  if(u){if(LANGS[u.lang])lang=u.lang;if(typeof u.region==='string'&&/^[A-Z]{2}$/.test(u.region))ui.region=u.region;if(u.sess&&typeof u.sess.region==='string'&&/^[A-Z]{2}$/.test(u.sess.region))ui.sess=u.sess}
+  else{var nl=(navigator.language||'en').slice(0,2);if(LANGS[nl])lang=nl}}catch(e){}
+function persistUi(){try{localStorage.setItem(LU,JSON.stringify({lang:lang,region:ui.region,sess:ui.sess}))}catch(e){}}
+
+function cur(){return REG[ui.region].cur}
+function nf(n){return new Intl.NumberFormat(LOC[lang]).format(Math.round(n))}
+function mf(n){return new Intl.NumberFormat(LOC[lang],{style:'currency',currency:cur()}).format(n)}
+function mf0(n){return new Intl.NumberFormat(LOC[lang],{style:'currency',currency:cur(),maximumFractionDigits:0}).format(n)}
+function pf(n){return new Intl.NumberFormat(LOC[lang],{style:'percent',maximumFractionDigits:0}).format(n)}
+function df(ts,time){return new Intl.DateTimeFormat(LOC[lang],time?{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}:{day:'numeric',month:'short'}).format(ts)}
+function sym(){try{return new Intl.NumberFormat(LOC[lang],{style:'currency',currency:cur(),currencyDisplay:'narrowSymbol'}).formatToParts(0).filter(function(p){return p.type==='currency'})[0].value}catch(e){return cur()}}
+function t(k,v,html){
+  var s=(T[lang]&&T[lang][k]);if(s==null)s=T.en[k];if(s==null)s=k;
+  if(v){for(var key in v){s=s.split('{'+key+'}').join(html?esc(v[key]):String(v[key]))}}
+  if(s.indexOf('{sym}')>-1)s=s.split('{sym}').join(sym());
+  if(s.indexOf('{unit}')>-1)s=s.split('{unit}').join(mf0(1));
+  return s;
+}
+
+/* ---------- data ---------- */
+function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;var x=Math.imul(a^a>>>15,1|a);x=x+Math.imul(x^x>>>7,61|x)^x;return((x^x>>>14)>>>0)/4294967296}}
+function dataKey(region,demo){return 'fidelo.data.v2.'+(demo?'demo.':'')+region}
+function loadData(region,demo){try{var d=JSON.parse(localStorage.getItem(dataKey(region,demo))||'null');return d&&d.tx&&d.rewards&&d.customers?d:null}catch(e){return null}}
+function save(){try{localStorage.setItem(dataKey(ui.region,ui.sess&&ui.sess.demo),JSON.stringify(S))}catch(e){}}
+function defaultRewards(region){
+  var R=REG[region],r=R.rw;
+  return [
+    {id:'r1',name:{en:'Free coffee',fr:'Café offert',es:'Café gratis',ar:'قهوة مجانية'},cost:r[0][0],value:r[0][1],type:'item',active:true},
+    {id:'r2',name:{en:'Free dessert',fr:'Dessert offert',es:'Postre gratis',ar:'حلوى مجانية'},cost:r[1][0],value:r[1][1],type:'item',active:true},
+    {id:'r3',auto:true,cost:r[2][0],value:r[2][1],type:'discount',active:true},
+    {id:'r4',name:{en:'Free main dish',fr:'Plat principal offert',es:'Plato principal gratis',ar:'طبق رئيسي مجاني'},cost:r[3][0],value:r[3][1],type:'item',active:true},
+    {id:'r5',auto:true,cost:r[4][0],value:r[4][1],type:'discount',active:true},
+    {id:'r6',name:{en:'2 free meals',fr:'2 repas offerts',es:'2 comidas gratis',ar:'وجبتان مجانيتان'},cost:r[5][0],value:r[5][1],type:'item',active:true,featured:true}
+  ];
+}
+function emptyData(region){return{region:region,rate:REG[region].rate,rewards:defaultRewards(region),customers:[],tx:[],venue:null}}
+function slug(n){return n.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z]+/g,'.')}
+function digits(rnd,n){var s='';for(var i=0;i<n;i++)s+=Math.floor(rnd()*10);return s}
+function genPhone(region,rnd){
+  if(region==='ES')return '+34 6'+digits(rnd,2)+' '+digits(rnd,3)+' '+digits(rnd,3);
+  if(region==='MA')return '+212 6 '+digits(rnd,2)+' '+digits(rnd,2)+' '+digits(rnd,2)+' '+digits(rnd,2);
+  return '+33 6 '+digits(rnd,2)+' '+digits(rnd,2)+' '+digits(rnd,2)+' '+digits(rnd,2);
+}
+function seedDemo(region){
+  var R=REG[region],rnd=mulberry(20261126+region.charCodeAt(0)*7),now=Date.now(),D=emptyData(region);
+  D.venue=JSON.parse(JSON.stringify(R.demoVenue));D.seededAt=now;
+  D.customers=R.names.map(function(n,i){return{id:'c'+(i+1),name:n,email:slug(n)+'@example.com',phone:genPhone(region,rnd),city:R.cities[Math.floor(rnd()*5)],joined:now-(30+Math.floor(rnd()*300))*DAY}});
+  var d0=new Date();d0.setHours(0,0,0,0);var start=d0.getTime(),evs=[];
+  for(var i=0;i<170;i++){
+    var ci=rnd()<0.2?1:Math.floor(rnd()*D.customers.length);
+    var day=Math.floor(rnd()*30),hour=8+Math.floor(rnd()*14);
+    var tm=start-day*DAY+hour*36e5+Math.floor(rnd()*36e5);
+    if(tm>now)continue;
+    evs.push({ci:ci,t:tm,amount:Math.max(R.step,Math.round((6+rnd()*rnd()*70)*R.scale/R.step)*R.step),pay:rnd()<0.55?'card':'cash'});
+  }
+  evs.sort(function(a,b){return a.t-b.t});
+  var n=0,bal={};
+  evs.forEach(function(e){
+    var cid=D.customers[e.ci].id,pts=Math.floor(e.amount*D.rate);
+    D.tx.push({id:'t'+(++n),t:e.t,cid:cid,type:'earn',amount:e.amount,points:pts,by:'staff',pay:(R.pay.cash&&R.pay.card?e.pay:(R.pay.card?'card':'cash'))});
+    bal[cid]=(bal[cid]||0)+pts;
+    if(rnd()<0.2){
+      var aff=D.rewards.filter(function(r){return r.cost<=bal[cid]});
+      if(aff.length){
+        var r=aff[Math.floor(rnd()*aff.length)];bal[cid]-=r.cost;
+        var by=rnd()<0.5?'customer':'staff';
+        D.tx.push({id:'t'+(++n),t:Math.min(now-1000,e.t+60000),cid:cid,type:'redeem',rid:r.id,points:r.cost,value:r.value,rtype:r.type,by:by,code:'FD-'+String(1000+((n*7919)%9000)),status:(by==='customer'&&now-e.t<3*DAY)?'active':'used'});
+      }
+    }
+  });
+  return D;
+}
+
+/* ---------- selectors ---------- */
+function cust(id){return S.customers.filter(function(c){return c.id===id})[0]}
+function rew(id){return S.rewards.filter(function(r){return r.id===id})[0]}
+function rn(r){if(!r)return '?';if(r.auto)return t('discountOff',{v:mf(r.value)});return r.name[lang]||r.name.en}
+function bal(cid){var s=0;S.tx.forEach(function(x){if(x.cid===cid)s+=x.type==='earn'?x.points:-x.points});return s}
+function memberNo(c){return '#'+String(S.customers.indexOf(c)+1).padStart(4,'0')}
+function custMeta(cid){var o={b:0,v:0,s:0,l:0};S.tx.forEach(function(x){if(x.cid!==cid)return;if(x.type==='earn'){o.b+=x.points;o.v++;o.s+=x.amount}else o.b-=x.points;if(x.t>o.l)o.l=x.t});return o}
+function defaultCid(){var best=S.customers[0],bd=1e9,tg=REG[ui.region].target;S.customers.forEach(function(c){var d=Math.abs(bal(c.id)-tg);if(d<bd){bd=d;best=c}});return best.id}
+function periodStart(P){var d=new Date();d.setHours(0,0,0,0);return d.getTime()-(P-1)*DAY}
+function stats(P){
+  var st=periodStart(P),days=[];
+  for(var i=0;i<P;i++)days.push({t:st+i*DAY,sales:0,iss:0,red:0});
+  var o={cash:0,card:0,gross:0,disc:0,iss:0,red:0,given:0,visits:0,act:{},byC:{},days:days};
+  S.tx.forEach(function(x){
+    if(x.t<st)return;
+    var d=days[Math.min(P-1,Math.max(0,Math.floor((x.t-st)/DAY)))];
+    if(x.type==='earn'){if(x.pay==='cash')o.cash+=x.amount;else if(x.pay==='card')o.card+=x.amount;o.gross+=x.amount;o.iss+=x.points;o.visits++;o.act[x.cid]=1;o.byC[x.cid]=(o.byC[x.cid]||0)+x.amount;d.sales+=x.amount;d.iss+=x.points}
+    else{o.red+=x.points;o.given++;if(x.rtype==='discount')o.disc+=x.value;d.red+=x.points}
+  });
+  return o;
+}
+function newCode(){var c;do{c='FD-'+(1000+Math.floor(Math.random()*9000))}while(S.tx.some(function(x){return x.code===c}));return c}
+
+/* ---------- validation ---------- */
+function cleanPhone(region,raw){
+  var s=String(raw).replace(/[\s().-]/g,'');
+  if(!REG[region].phoneRe.test(s))return null;
+  return REG[region].cc+' '+s.slice(-(REG[region].phoneLen||9)).replace(/(\d{3})(?=\d)/g,'$1 ');
+}
+
+/* ---------- toast ---------- */
+var toastTimer=null;
+function toast(msg,err){var el=$('#toast');el.textContent=msg;el.className=err?'err':'';el.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(function(){el.hidden=true},3600)}
+
+/* ---------- views ---------- */
+var LOGO='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></svg>';
+var CHEV='<svg class="flip" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+function header(){
+  var who='';
+  if(ui.sess){var nm=ui.sess.role==='business'?(S.venue&&S.venue.name):(cust(ui.sess.cid)||{}).name;who='<span class="who">'+esc(nm||'')+' · '+cur()+'</span><button type="button" class="btn ghost sm" data-act="signout">'+t('signOut')+'</button>'}
+  return '<header class="top"><div class="brand"><span class="mark">'+LOGO+'</span><div><b>Fidelo</b><small>'+esc(t('tagline'))+'</small></div></div>'+
+  '<div class="ctrls">'+who+'<label class="langsel"><span class="sr">'+t('language')+'</span><select id="lang">'+Object.keys(LANGS).map(function(k){return '<option value="'+k+'" lang="'+k+'"'+(k===lang?' selected':'')+'>'+LANGS[k]+'</option>'}).join('')+'</select></label></div></header>';
+}
+function footer(){
+  var btn=ui.sess&&ui.sess.demo?'<button type="button" class="btn ghost sm" data-act="reset">'+(ui.confirmReset?t('resetConfirm'):t('reset'))+'</button>':'';
+  return btn?'<footer class="foot"><span></span>'+btn+'</footer>':'';
+}
+
+function welcome(){
+  var regs=enabledKeys().map(function(k){return '<button type="button" class="reg" data-act="region" data-v="'+k+'" aria-pressed="'+(ui.region===k)+'"><b>'+esc(REG[k].name[lang]||REG[k].name.en)+'</b><span>'+esc(curName(REG[k].cur))+' · '+REG[k].cur+'</span></button>'}).join('');
+  return '<section class="welcome"><h1>'+t('welcomeTitle')+'</h1><p class="muted">'+t('welcomeSub')+'</p></section>'+
+  '<section class="panel"><h2>'+t('chooseCountry')+'</h2><div class="regs">'+regs+'</div></section>'+
+  '<div class="grid2">'+
+   '<button type="button" class="role" data-act="screen" data-v="signup-customer"><div><h2>'+t('iamCustomer')+'</h2><p>'+t('iamCustomerSub')+'</p></div>'+CHEV+'</button>'+
+   '<button type="button" class="role" data-act="screen" data-v="signup-business"><div><h2>'+t('iamBusiness')+'</h2><p>'+t('iamBusinessSub')+'</p></div>'+CHEV+'</button></div>'+
+  '<div class="alt"><span>'+t('haveAccount')+'</span><button type="button" class="btn ghost sm" data-act="screen" data-v="signin">'+t('signIn')+'</button></div>'+
+  '';
+}
+function countryLine(){return '<div class="head"><span class="muted">'+t('country')+': <b>'+esc(REG[ui.region].name[lang]||REG[ui.region].name.en)+'</b> · '+cur()+'</span><button type="button" class="btn ghost sm" data-act="screen" data-v="welcome">'+t('changeCountry')+'</button></div>'}
+function cityList(){return '<datalist id="cities">'+REG[ui.region].cities.map(function(c){return '<option value="'+esc(c)+'"></option>'}).join('')+'</datalist>'}
+function phoneField(id,label,req){
+  var R=REG[ui.region];
+  return '<div class="field"><label for="'+id+'">'+label+'</label><div class="pfx" dir="ltr"><span dir="ltr">'+esc(R.cc)+'</span><input class="in" id="'+id+'" name="phone" type="tel" inputmode="tel" placeholder="'+esc(R.phoneEx)+'" autocomplete="tel-national" dir="ltr"'+(req?' required':'')+'></div><p class="ferr" id="err-phone" role="alert"></p></div>';
+}
+function signupCustomer(){
+  return '<div class="auth" style="display:flex;flex-direction:column;gap:14px;margin-inline:auto">'+countryLine()+
+  '<form class="panel" data-form="signupCustomer"><h2>'+t('createCustomer')+'</h2><div class="formgrid">'+
+  '<div class="field"><label for="cn">'+t('fullName')+'</label><input class="in" id="cn" name="name" autocomplete="name" required></div>'+
+  '<div class="field"><label for="ce">'+t('email')+'</label><input class="in" id="ce" name="email" type="email" autocomplete="email" dir="ltr" required><p class="ferr" id="err-email" role="alert"></p></div>'+
+  phoneField('cp',t('phone'),true)+
+  '<div class="field"><label for="cc">'+t('city')+'</label><input class="in" id="cc" name="city" list="cities" autocomplete="address-level2" required></div></div>'+cityList()+
+  '<label class="check"><input type="checkbox" name="consent" required><span>'+t('consentCustomer')+'</span></label>'+
+  '<div class="head"><button type="button" class="btn ghost" data-act="screen" data-v="welcome">'+t('back')+'</button><button class="btn" type="submit">'+t('createAccount')+'</button></div></form></div>';
+}
+function signupBusiness(){
+  var R=REG[ui.region];
+  return '<div class="auth" style="display:flex;flex-direction:column;gap:14px;margin-inline:auto">'+countryLine()+
+  '<form class="panel" data-form="signupBusiness"><h2>'+t('createBusiness')+'</h2><div class="formgrid">'+
+  '<div class="field"><label for="bn">'+t('bizName')+'</label><input class="in" id="bn" name="name" required></div>'+
+  '<div class="field"><label for="bt">'+t('bizType')+'</label><select id="bt" name="type"><option value="cafe">'+t('tCafe')+'</option><option value="restaurant">'+t('tRestaurant')+'</option><option value="bakery">'+t('tBakery')+'</option><option value="other">'+t('tOther')+'</option></select></div>'+
+  '<div class="field"><label for="be">'+t('proEmail')+'</label><input class="in" id="be" name="email" type="email" autocomplete="email" dir="ltr" required><p class="ferr" id="err-email" role="alert"></p></div>'+
+  phoneField('bp',t('phone'),true)+
+  '<div class="field"><label for="ba">'+t('address')+'</label><input class="in" id="ba" name="address" autocomplete="street-address" required></div>'+
+  '<div class="field"><label for="bc">'+t('city')+'</label><input class="in" id="bc" name="city" list="cities" autocomplete="address-level2" required></div></div>'+cityList()+
+  '<div class="only"><h3>'+t('bizOnly')+'</h3><div class="formgrid">'+
+  '<div class="field"><label for="br">'+t('rateLabel')+'</label><input class="in" id="br" name="rate" type="number" min="1" step="1" value="'+R.rate+'" required></div></div>'+
+  '<label class="check"><input type="checkbox" name="consent" required><span>'+t('consentBusiness')+'</span></label></div>'+
+  '<p class="ferr" id="err-form" role="alert"></p>'+
+  '<div class="head"><button type="button" class="btn ghost" data-act="screen" data-v="welcome">'+t('back')+'</button><button class="btn" type="submit">'+t('registerBtn')+'</button></div></form></div>';
+}
+function signinView(){
+  return '<div class="auth" style="display:flex;flex-direction:column;gap:14px;margin-inline:auto">'+
+  '<form class="panel" data-form="signin"><h2>'+t('signIn')+'</h2><div class="field"><label for="se">'+t('email')+'</label><input class="in" id="se" name="email" type="email" autocomplete="email" dir="ltr" required><p class="ferr" id="err-email" role="alert"></p></div>'+
+  '<div class="head"><button type="button" class="btn ghost" data-act="screen" data-v="welcome">'+t('back')+'</button><button class="btn" type="submit">'+t('signIn')+'</button></div></form></div>';
+}
+function authScreen(){
+  return ({welcome:welcome,'signup-customer':signupCustomer,'signup-business':signupBusiness,signin:signinView}[ui.screen]||welcome)();
+}
+
+function customerView(cid){
+  var c=cust(cid)||S.customers[0];if(!c)return '';
+  var b=bal(c.id);
+  var rs=S.rewards.filter(function(r){return r.active}).sort(function(a,z){return a.cost-z.cost});
+  var next=rs.filter(function(r){return r.cost>b})[0];
+  var pct=next?Math.min(1,b/next.cost):1,filled=Math.floor(pct*10);
+  var dots='';for(var i=0;i<10;i++)dots+='<i'+(i<filled?' class="on"':'')+'></i>';
+  var note=next?t('toNext',{n:nf(next.cost-b),name:rn(next)},true):t('allDone');
+  var hero='<section class="card-hero" aria-label="'+esc(t('yourPoints'))+'"><div class="ch-top"><span>'+esc(S.venue?S.venue.name:'Fidelo')+'</span><span>'+t('memberId')+' '+memberNo(c)+'</span></div>'+
+    '<div class="ch-name">'+esc(c.name)+'</div><div class="ch-pts"><span class="big">'+nf(b)+'</span><span>'+t('pts')+'</span></div>'+
+    '<div class="stamps" role="img" aria-label="'+esc(t('stampsLabel'))+'">'+dots+'</div><p class="ch-note">'+note+'</p><p class="ch-rule">'+t('earnRule',{rate:nf(S.rate)},true)+'</p></section>';
+  var vs=S.tx.filter(function(x){return x.cid===c.id&&x.type==='redeem'}).sort(function(a,z){return z.t-a.t}).slice(0,4);
+  var vouchers='<section class="panel"><h2>'+t('vouchersTitle')+'</h2>'+(vs.length?vs.map(function(x){
+    return '<div class="vouch'+(x.status==='used'?' used':'')+'"><div class="row"><b>'+esc(rn(rew(x.rid)))+'</b><span class="chip '+(x.status==='used'?'':'item')+'">'+t(x.status==='used'?'voucherUsed':'voucherReady')+'</span></div><span class="code">'+esc(x.code)+'</span>'+(x.status==='active'?'<span class="sub">'+t('showCode')+'</span>':'<span class="sub">'+df(x.t)+'</span>')+'</div>'}).join(''):'<p class="empty">'+t('noVouchers')+'</p>')+'</section>';
+  var cards=rs.map(function(r){
+    var ok=b>=r.cost;
+    return '<article class="rw'+(ok?' ok':'')+'"><div class="rw-top"><span class="chip '+r.type+'">'+t(r.type==='item'?'typeItem':'typeDiscount')+'</span>'+(r.featured?'<span class="chip gold">'+t('featured')+'</span>':'')+'</div>'+
+    '<h3>'+esc(rn(r))+'</h3>'+(r.type==='discount'?'':'')+
+    '<p class="rw-cost"><b>'+nf(r.cost)+'</b> '+t('pts')+'</p>'+
+    '<button type="button" class="btn'+(ok?'':' ghost')+'" data-act="selfRedeem" data-v="'+r.id+'"'+(ok?'':' disabled')+'>'+(ok?t('redeem'):t('needMore',{n:nf(r.cost-b)},true))+'</button></article>'}).join('');
+  var hist=S.tx.filter(function(x){return x.cid===c.id}).sort(function(a,z){return z.t-a.t}).slice(0,8);
+  var history='<section class="panel"><h2>'+t('historyTitle')+'</h2>'+(hist.length?'<ul class="list">'+hist.map(function(x){
+    var e=x.type==='earn';
+    return '<li><div class="l"><b>'+(e?t('billOf',{amount:mf(x.amount)},true):esc(rn(rew(x.rid))))+'</b><div class="sub">'+(e?t('earned'):t('redeemed'))+' · '+df(x.t)+'</div></div><div class="r num '+(e?'pos':'neg')+'">'+(e?'+':'−')+nf(x.points)+' '+t('pts')+'</div></li>'}).join('')+'</ul>':'<p class="empty">'+t('noHistory')+'</p>')+'</section>';
+  return '<div class="grid2">'+hero+vouchers+'</div>'+
+    '<section style="display:flex;flex-direction:column;gap:12px"><div><h2>'+t('rewardsTitle')+'</h2><p class="muted">'+t('rewardsSub')+'</p></div><div class="rw-grid">'+cards+'</div></section>'+history;
+}
+
+function niceMax(v){if(v<=0)return 1;var p=Math.pow(10,Math.floor(Math.log10(v))),m=v/p;return(m<=1?1:m<=2?2:m<=5?5:10)*p}
+function axisMax(vals){var m=Math.max.apply(null,vals);return m>0?niceMax(m):100}
+function xaxis(days){var n=days.length;return '<div class="xax"><span>'+df(days[0].t)+'</span><span>'+df(days[Math.floor(n/2)].t)+'</span><span>'+df(days[n-1].t)+'</span></div>'}
+function salesChart(days){
+  var max=axisMax(days.map(function(d){return d.sales}));
+  return '<div class="chart"><div class="yax"><span>'+mf0(max)+'</span><span>'+mf0(max/2)+'</span><span>0</span></div><div class="plot"><div class="cols">'+
+    days.map(function(d){return '<div class="col" title="'+esc(df(d.t)+': '+mf(d.sales))+'"><i style="height:'+(d.sales/max*100).toFixed(1)+'%"></i></div>'}).join('')+'</div></div>'+xaxis(days)+'</div>';
+}
+function pointsChart(days){
+  var max=axisMax(days.map(function(d){return Math.max(d.iss,d.red)}));
+  return '<div class="chart"><div class="yax"><span>'+nf(max)+'</span><span>'+nf(max/2)+'</span><span>0</span></div><div class="plot"><div class="cols">'+
+    days.map(function(d){return '<div class="col" title="'+esc(df(d.t)+': +'+nf(d.iss)+' / −'+nf(d.red))+'"><i style="height:'+(d.iss/max*100).toFixed(1)+'%"></i><i class="b" style="height:'+(d.red/max*100).toFixed(1)+'%"></i></div>'}).join('')+'</div></div>'+xaxis(days)+'</div>';
+}
+function actItem(x){
+  var c=cust(x.cid),nm=c?c.name:'?',e=x.type==='earn';
+  var text=e?t('evEarn',{name:nm,n:nf(x.points),amount:mf(x.amount)},true):t('evRedeem',{name:nm,reward:rn(rew(x.rid)),n:nf(x.points)},true);
+  var meta=df(x.t,true)+' · '+t(x.by==='customer'?'viaApp':'atTill')+(x.code?' · '+esc(x.code):'')+(x.pay?' · '+t(x.pay==='card'?'payCard':'payCash'):'');
+  return '<li><div class="l"><div>'+text+'</div><div class="sub">'+meta+'</div></div><div class="r num '+(e?'pos':'neg')+'">'+(e?'+':'−')+nf(x.points)+'</div></li>';
+}
+function periodSeg(){return '<div class="seg" role="group">'+[7,30].map(function(p){return '<button type="button" data-act="period" data-v="'+p+'" aria-pressed="'+(ui.period===p)+'">'+t(p===7?'last7':'last30')+'</button>'}).join('')+'</div>'}
+
+function vOverview(){
+  var o=stats(ui.period),net=o.gross-o.disc,avg=o.visits?o.gross/o.visits:0,rate=o.iss?o.red/o.iss:0;
+  var kpi=function(k,v,n,main){return '<div class="kpi'+(main?' main':'')+'"><div class="k">'+t(k)+'</div><div class="v">'+v+'</div>'+(n?'<div class="n">'+n+'</div>':'')+'</div>'};
+  var top=Object.keys(o.byC).map(function(id){return{c:cust(id),s:o.byC[id]}}).filter(function(r){return r.c}).sort(function(a,z){return z.s-a.s}).slice(0,5);
+  var topMax=top.length?top[0].s:1;
+  var recent=S.tx.slice().sort(function(a,z){return z.t-a.t}).slice(0,6);
+  var empty=S.tx.length?'':'<div class="banner"><span>'+t('emptyOverview')+'</span><button type="button" class="btn sm" data-act="tab" data-v="till">'+t('goTill')+'</button></div>';
+  var PY=REG[ui.region].pay,share=function(v){return o.gross?t('shareOfSales',{p:pf(v/o.gross)},true):''};
+  var payTiles=(PY.cash?kpi('cashSales',mf(o.cash),share(o.cash)):'')+(PY.card?kpi('cardSales',mf(o.card),share(o.card)):'');
+  return empty+'<div class="head">'+periodSeg()+'</div>'+
+  '<section><div class="group-title">'+t('revenueGroup')+'</div><div class="kpis">'+
+    kpi('netRevenue',mf(net),t('netNote',{d:mf(o.disc)},true),true)+kpi('grossSales',mf(o.gross))+kpi('avgTicket',mf(avg))+kpi('activeCustomers',nf(Object.keys(o.act).length))+payTiles+'</div></section>'+
+  '<section><div class="group-title">'+t('pointsGroup')+'</div><div class="kpis">'+
+    kpi('pointsIssued',nf(o.iss))+kpi('pointsRedeemed',nf(o.red))+kpi('redemptionRate',pf(rate))+kpi('rewardsGiven',nf(o.given))+'</div></section>'+
+  '<div class="grid2"><section class="panel"><h2>'+t('chartSales')+'</h2>'+salesChart(o.days)+'</section>'+
+  '<section class="panel"><h2>'+t('chartPoints')+'</h2>'+pointsChart(o.days)+'<div class="legend"><span>'+t('pointsIssued')+'</span><span class="b">'+t('pointsRedeemed')+'</span></div></section></div>'+
+  '<div class="grid2"><section class="panel"><h2>'+t('topCustomers')+'</h2>'+(top.length?'<ul class="list">'+top.map(function(r){
+    return '<li><div class="l" style="flex:1"><b>'+esc(r.c.name)+'</b><div class="bar"><i style="width:'+(r.s/topMax*100).toFixed(0)+'%"></i></div></div><div class="r num"><b>'+mf(r.s)+'</b><div class="sub">'+nf(bal(r.c.id))+' '+t('pts')+'</div></div></li>'}).join('')+'</ul>':'<p class="empty">'+t('noResults')+'</p>')+'</section>'+
+  '<section class="panel"><div class="head"><h2>'+t('recent')+'</h2><button type="button" class="btn ghost sm" data-act="tab" data-v="activity">'+t('seeAll')+'</button></div>'+(recent.length?'<ul class="list">'+recent.map(actItem).join('')+'</ul>':'<p class="empty">'+t('noHistory')+'</p>')+'</section></div>';
+}
+function custRows(){
+  var q=ui.search.trim().toLowerCase(),qd=q.replace(/\s/g,'');
+  var rows=S.customers.map(function(c){var m=custMeta(c.id);return{c:c,m:m}}).filter(function(r){return !q||r.c.name.toLowerCase().indexOf(q)>-1||(r.c.phone||'').replace(/\s/g,'').indexOf(qd)>-1}).sort(function(a,z){return z.m.b-a.m.b});
+  if(!rows.length)return '<tr><td colspan="6" class="empty">'+t('noResults')+'</td></tr>';
+  return rows.map(function(r){return '<tr><td><b>'+esc(r.c.name)+'</b><div class="sub">'+memberNo(r.c)+(r.c.phone?' · <span dir="ltr">'+esc(r.c.phone)+'</span>':'')+(r.c.city?' · '+esc(r.c.city):'')+'</div></td><td class="num">'+nf(r.m.b)+'</td><td class="num">'+nf(r.m.v)+'</td><td class="num">'+mf(r.m.s)+'</td><td class="num">'+(r.m.l?df(r.m.l):'–')+'</td><td><button type="button" class="btn ghost sm" data-act="viewAs" data-v="'+r.c.id+'">'+t('viewAs')+'</button></td></tr>'}).join('');
+}
+function vCustomers(){
+  var R=REG[ui.region];
+  return '<section class="panel"><h2>'+t('addCustomer')+'</h2><form data-form="addCustomer"><div class="row-form"><div class="field"><label for="cName">'+t('fullName')+'</label><input class="in" id="cName" name="name" required autocomplete="off"></div>'+
+  '<div class="field"><label for="cPhone">'+t('phone')+'</label><div class="pfx" dir="ltr"><span dir="ltr">'+esc(R.cc)+'</span><input class="in" id="cPhone" name="phone" inputmode="tel" placeholder="'+esc(R.phoneEx)+'" autocomplete="off" dir="ltr"></div><p class="ferr" id="err-phone" role="alert"></p></div>'+
+  '<div class="field"><label for="cCity">'+t('city')+'</label><input class="in" id="cCity" name="city" list="cities" autocomplete="off"></div><button class="btn" type="submit">'+t('add')+'</button></div>'+cityList()+'</form></section>'+
+  '<section class="panel"><div class="head"><h2>'+t('customers')+' <span class="muted num">'+nf(S.customers.length)+'</span></h2><div><label class="sr" for="search">'+t('searchPh')+'</label><input class="in" id="search" type="search" placeholder="'+esc(t('searchPh'))+'" value="'+esc(ui.search)+'" autocomplete="off"></div></div>'+
+  '<div class="tablewrap"><table><thead><tr><th>'+t('colCustomer')+'</th><th class="num">'+t('colPoints')+'</th><th class="num">'+t('colVisits')+'</th><th class="num">'+t('colSpent')+'</th><th class="num">'+t('colLast')+'</th><th></th></tr></thead><tbody id="custRows">'+custRows()+'</tbody></table></div></section>';
+}
+function vActivity(){
+  var rows=S.tx.slice().sort(function(a,z){return z.t-a.t}).filter(function(x){return ui.actFilter==='all'||(ui.actFilter==='earn'?x.type==='earn':x.type==='redeem')}).slice(0,60);
+  var f=[['all','filterAll'],['earn','filterEarned'],['redeem','filterRedeemed']];
+  return '<section class="panel"><div class="head"><h2>'+t('activity')+'</h2><div class="chips">'+f.map(function(p){return '<button type="button" class="btn'+(ui.actFilter===p[0]?'':' ghost')+'" data-act="filter" data-v="'+p[0]+'">'+t(p[1])+'</button>'}).join('')+'</div></div>'+(rows.length?'<ul class="list">'+rows.map(actItem).join('')+'</ul>':'<p class="empty">'+t('noHistory')+'</p>')+'</section>';
+}
+function custOptions(){return '<option value="">'+t('chooseCustomer')+'</option>'+S.customers.map(function(c){return '<option value="'+c.id+'">'+esc(c.name)+'</option>'}).join('')}
+function payField(){
+  var P=REG[ui.region].pay,gl=gatewayLabel(P),o='';
+  if(P.cash)o+='<option value="cash">'+t('payCash')+'</option>';
+  if(P.card)o+='<option value="card">'+t('payCard')+(gl?' · '+esc(gl):'')+'</option>';
+  return '<div class="field"><label for="salePay">'+t('payMethod')+'</label><select id="salePay" name="pay">'+o+'</select></div>';
+}
+function vTill(){
+  var rs=S.rewards.filter(function(r){return r.active}).sort(function(a,z){return a.cost-z.cost});
+  var none=S.customers.length?'':'<div class="banner"><span>'+t('emptyCustomers')+'</span><button type="button" class="btn sm" data-act="tab" data-v="customers">'+t('goCustomers')+'</button></div>';
+  return none+'<div class="grid2">'+
+  '<form class="panel" data-form="sale"><h2>'+t('recordSale')+'</h2><div class="field"><label for="saleCid">'+t('customerLabel')+'</label><select id="saleCid" name="cid" required>'+custOptions()+'</select></div>'+
+  '<div class="field"><label for="saleAmt">'+t('billAmount')+'</label><input class="in" id="saleAmt" name="amt" inputmode="decimal" placeholder="'+esc(REG[ui.region].sample)+'" autocomplete="off" required></div>'+payField()+'<p class="hint" id="willEarn" aria-live="polite"></p><button class="btn" type="submit">'+t('record')+'</button></form>'+
+  '<form class="panel" data-form="redeem"><h2>'+t('redeemForCustomer')+'</h2><div class="field"><label for="redCid">'+t('customerLabel')+'</label><select id="redCid" name="cid" required>'+custOptions()+'</select></div>'+
+  '<div class="field"><label for="redRid">'+t('chooseReward')+'</label><select id="redRid" name="rid" required><option value="">'+t('chooseReward')+'</option>'+rs.map(function(r){return '<option value="'+r.id+'">'+esc(rn(r))+' — '+nf(r.cost)+' '+t('pts')+'</option>'}).join('')+'</select></div><p class="hint" id="redInfo" aria-live="polite"></p><button class="btn" type="submit">'+t('redeemNow')+'</button></form></div>'+
+  '<form class="panel" data-form="validate"><h2>'+t('validateTitle')+'</h2><div class="row-form"><div class="field"><label for="vCode">'+t('voucherCode')+'</label><input class="in" id="vCode" name="code" placeholder="FD-1234" autocomplete="off" dir="ltr" required></div><button class="btn" type="submit">'+t('validate')+'</button></div></form>';
+}
+function vRewards(){
+  var rs=S.rewards.slice().sort(function(a,z){return a.cost-z.cost});
+  return '<section class="panel"><h2>'+t('rulesTitle')+'</h2><div class="row-form"><div class="field" style="max-width:260px"><label for="rate">'+t('rateLabel')+'</label><input class="in" id="rate" type="number" min="1" step="1" value="'+S.rate+'"></div></div><p class="sub">'+t('earnRule',{rate:nf(S.rate)},true)+'</p></section>'+
+  '<section class="panel"><h2>'+t('rewardsCatalog')+'</h2><div class="tablewrap"><table><thead><tr><th>'+t('colReward')+'</th><th>'+t('colType')+'</th><th class="num">'+t('colCost')+'</th><th class="num">'+t('colValue')+'</th><th>'+t('colActive')+'</th></tr></thead><tbody>'+
+  rs.map(function(r){return '<tr><td><b>'+esc(rn(r))+'</b></td><td><span class="chip '+r.type+'">'+t(r.type==='item'?'typeItem':'typeDiscount')+'</span></td>'+
+    '<td class="num"><input class="in sm num" type="number" min="0" step="10" value="'+r.cost+'" data-rw="cost" data-rid="'+r.id+'" aria-label="'+esc(rn(r)+' – '+t('colCost'))+'"></td>'+
+    '<td class="num"><input class="in sm num" type="number" min="0" step="0.5" value="'+r.value+'" data-rw="value" data-rid="'+r.id+'" aria-label="'+esc(rn(r)+' – '+t('colValue'))+'"></td>'+
+    '<td><input type="checkbox" data-rw="active" data-rid="'+r.id+'"'+(r.active?' checked':'')+' aria-label="'+esc(rn(r)+' – '+t('colActive'))+'"></td></tr>'}).join('')+'</tbody></table></div></section>'+
+  '<form class="panel" data-form="addReward"><h2>'+t('newReward')+'</h2><div class="row-form"><div class="field"><label for="nrName">'+t('rewardName')+'</label><input class="in" id="nrName" name="name" required autocomplete="off"></div>'+
+  '<div class="field"><label for="nrType">'+t('typeLabel')+'</label><select id="nrType" name="type"><option value="item">'+t('typeItem')+'</option><option value="discount">'+t('typeDiscount')+'</option></select></div>'+
+  '<div class="field"><label for="nrCost">'+t('cost')+'</label><input class="in" id="nrCost" name="cost" type="number" min="1" step="10" required></div>'+
+  '<div class="field"><label for="nrValue">'+t('value')+'</label><input class="in" id="nrValue" name="value" type="number" min="0" step="0.5" required></div><button class="btn" type="submit">'+t('add')+'</button></div></form>';
+}
+function staffView(){
+  var tabs=[['overview','overview'],['customers','customers'],['activity','activity'],['till','till'],['rewards','rewardsTab']];
+  var views={overview:vOverview,customers:vCustomers,activity:vActivity,till:vTill,rewards:vRewards};
+  return '<nav class="tabs" role="tablist">'+tabs.map(function(p){return '<button type="button" role="tab" class="tab" aria-selected="'+(ui.tab===p[0])+'" data-act="tab" data-v="'+p[0]+'">'+t(p[1])+'</button>'}).join('')+'</nav>'+(views[ui.tab]||vOverview)();
+}
+function previewBar(){return '<div class="banner"><span>'+t('previewBanner')+'</span><button type="button" class="btn sm" data-act="endPreview">'+t('backToDash')+'</button></div>'}
+
+function render(){
+  var rtl=lang==='ar';
+  document.documentElement.lang=lang;document.documentElement.dir=rtl?'rtl':'ltr';
+  var app=$('#app');app.setAttribute('dir',rtl?'rtl':'ltr');
+  var body;
+  if(!ui.sess)body=header()+authScreen();
+  else if(ui.sess.role==='customer')body=header()+customerView(ui.sess.cid)+footer();
+  else body=header()+(ui.preview?previewBar()+customerView(ui.preview):staffView())+footer();
+  app.innerHTML=body;
+}
+
+/* ---------- sessions ---------- */
+function startSession(sess,data){ui.sess=sess;ui.region=sess.region;S=data;ui.preview=null;ui.tab='overview';ui.confirmReset=false;save();persistUi();render();window.scrollTo(0,0)}
+function signOut(){ui.sess=null;S=null;ui.preview=null;ui.screen='welcome';ui.confirmReset=false;persistUi();render();window.scrollTo(0,0)}
+
+function doRedeem(cid,rid,by){
+  var r=rew(rid),c=cust(cid);if(!r||!c)return;
+  if(bal(cid)<r.cost){toast(t('notEnough'),true);return}
+  var code=newCode();
+  S.tx.push({id:'t'+Date.now()+Math.random().toString(36).slice(2,5),t:Date.now(),cid:cid,type:'redeem',rid:rid,points:r.cost,value:r.value,rtype:r.type,by:by,code:code,status:by==='customer'?'active':'used'});
+  save();render();
+  toast(t('redeemedOk',{name:rn(r),code:code}));
+}
+
+function snapForms(){var o={};document.querySelectorAll('form[data-form]').forEach(function(f){var v={};Array.prototype.forEach.call(f.elements,function(el){if(!el.name)return;v[el.name]=el.type==='checkbox'?el.checked:el.value});o[f.dataset.form]=v});return o}
+function restoreForms(o){document.querySelectorAll('form[data-form]').forEach(function(f){var v=o[f.dataset.form];if(!v)return;Array.prototype.forEach.call(f.elements,function(el){if(!el.name||!(el.name in v))return;if(el.type==='checkbox')el.checked=v[el.name];else el.value=v[el.name]})})}
+
+/* ---------- events ---------- */
+document.addEventListener('click',function(e){
+  var el=e.target.closest('[data-act]');if(!el)return;
+  var a=el.dataset.act,v=el.dataset.v;
+  if(a!=='reset')ui.confirmReset=false;
+  if(a==='region'){ui.region=v;persistUi();render()}
+  else if(a==='screen'){ui.screen=v;render();window.scrollTo(0,0)}
+  else if(a==='signout'){signOut()}
+  else if(a==='demo'){
+    var D=loadData(ui.region,true);if(!D||Date.now()-(D.seededAt||0)>DAY)D=seedDemo(ui.region);
+    var sess={role:v,region:ui.region,demo:true};
+    ui.sess=sess;S=D;
+    if(v==='customer')sess.cid=defaultCid();
+    startSession(sess,D);
+  }
+  else if(a==='tab'){ui.tab=v;render()}
+  else if(a==='period'){ui.period=+v;render()}
+  else if(a==='filter'){ui.actFilter=v;render()}
+  else if(a==='selfRedeem'){doRedeem(ui.preview||ui.sess.cid,v,ui.preview?'staff':'customer')}
+  else if(a==='viewAs'){ui.preview=v;render();window.scrollTo(0,0)}
+  else if(a==='endPreview'){ui.preview=null;render();window.scrollTo(0,0)}
+  else if(a==='reset'){
+    if(!ui.confirmReset){ui.confirmReset=true;render();return}
+    S=seedDemo(ui.region);ui.confirmReset=false;
+    if(ui.sess.role==='customer'){ui.sess.cid=defaultCid();persistUi()}
+    save();render();
+  }
+});
+document.addEventListener('change',function(e){
+  var el=e.target;
+  if(el.id==='lang'){var snap=snapForms();lang=el.value;persistUi();render();restoreForms(snap)}
+  else if(el.id==='rate'){S.rate=Math.max(1,parseFloat(el.value)||1);save();toast(t('saved'))}
+  else if(el.dataset&&el.dataset.rw){
+    var r=rew(el.dataset.rid);if(!r)return;
+    if(el.dataset.rw==='active')r.active=el.checked;else r[el.dataset.rw]=Math.max(0,parseFloat(el.value)||0);
+    save();toast(t('saved'));
+  }
+});
+function parseAmt(s){var n=parseFloat(String(s).replace(',','.'));return isFinite(n)&&n>0?n:0}
+document.addEventListener('input',function(e){
+  var el=e.target;
+  if(el.id==='search'){ui.search=el.value;var tb=$('#custRows');if(tb)tb.innerHTML=custRows()}
+  else if(el.id==='saleAmt'||el.id==='saleCid'){var amt=parseAmt($('#saleAmt').value);$('#willEarn').textContent=amt?t('willEarn',{n:nf(Math.floor(amt*S.rate))}):''}
+  else if(el.id==='redCid'||el.id==='redRid'){
+    var cid=$('#redCid').value,rid=$('#redRid').value,info='';
+    if(cid){var b=bal(cid);info=t('balanceIs',{n:nf(b)});var r=rew(rid);if(r&&b<r.cost)info+=' · '+t('notEnough')}
+    $('#redInfo').textContent=info;
+  }
+});
+
+function clearErrs(f){var es=f.querySelectorAll('.ferr');for(var i=0;i<es.length;i++)es[i].textContent='';var ins=f.querySelectorAll('[aria-invalid]');for(var j=0;j<ins.length;j++)ins[j].removeAttribute('aria-invalid')}
+function setErr(f,name,msg){var m=f.querySelector('#err-'+name);if(m)m.textContent=msg;var inp=f.elements[name];if(inp){inp.setAttribute('aria-invalid','true');if(inp.focus&&!f._focused){inp.focus();f._focused=true}}}
+function findAccount(email){
+  var keys=enabledKeys();
+  for(var i=0;i<keys.length;i++){
+    var D=loadData(keys[i],false);if(!D)continue;
+    if(D.venue&&D.venue.email===email)return{role:'business',region:keys[i],D:D};
+    var c=D.customers.filter(function(x){return x.email===email})[0];
+    if(c)return{role:'customer',region:keys[i],D:D,cid:c.id};
+  }
+  return null;
+}
+document.addEventListener('submit',function(e){
+  e.preventDefault();
+  var f=e.target,k=f.dataset.form,d=new FormData(f);
+  clearErrs(f);f._focused=false;
+  var region=ui.region;
+  if(k==='signupCustomer'){
+    var email=String(d.get('email')).trim().toLowerCase(),phone=cleanPhone(region,d.get('phone')),bad=false;
+    var D=loadData(region,false)||emptyData(region);
+    if(D.customers.some(function(c){return c.email===email})||(D.venue&&D.venue.email===email)){setErr(f,'email',t('errEmailUsed'));bad=true}
+    if(!phone){setErr(f,'phone',t('errPhone',{ex:REG[region].cc+' '+REG[region].phoneEx}));bad=true}
+    if(bad)return;
+    var c={id:'c'+Date.now(),name:String(d.get('name')).trim(),email:email,phone:phone,city:String(d.get('city')).trim(),joined:Date.now()};
+    D.customers.push(c);
+    startSession({role:'customer',region:region,demo:false,cid:c.id},D);
+  }else if(k==='signupBusiness'){
+    var em=String(d.get('email')).trim().toLowerCase(),ph=cleanPhone(region,d.get('phone')),bd=false;
+    var B=loadData(region,false)||emptyData(region);
+    if(B.venue){setErr(f,'form',t('errBizExists'));return}
+    if(B.customers.some(function(c){return c.email===em})){setErr(f,'email',t('errEmailUsed'));bd=true}
+    if(!ph){setErr(f,'phone',t('errPhone',{ex:REG[region].cc+' '+REG[region].phoneEx}));bd=true}
+    if(bd)return;
+    B.venue={name:String(d.get('name')).trim(),type:String(d.get('type')),email:em,phone:ph,address:String(d.get('address')).trim(),city:String(d.get('city')).trim(),since:Date.now()};
+    B.rate=Math.max(1,parseFloat(d.get('rate'))||REG[region].rate);
+    startSession({role:'business',region:region,demo:false},B);
+  }else if(k==='signin'){
+    var se=String(d.get('email')).trim().toLowerCase(),acc=findAccount(se);
+    if(!acc){setErr(f,'email',t('errNoAccount'));return}
+    var sess={role:acc.role,region:acc.region,demo:false};if(acc.cid)sess.cid=acc.cid;
+    startSession(sess,acc.D);
+  }else if(k==='sale'){
+    var cid=d.get('cid'),amt=parseAmt(d.get('amt')),cc=cust(cid);
+    if(!cc){toast(t('chooseFirst'),true);return}
+    if(!amt){toast(t('invalidAmount'),true);return}
+    var pts=Math.floor(amt*S.rate);
+    var PYm=REG[ui.region].pay,pay=String(d.get('pay'));if(!(pay==='cash'&&PYm.cash)&&!(pay==='card'&&PYm.card))pay=PYm.cash?'cash':'card';
+    S.tx.push({id:'t'+Date.now(),t:Date.now(),cid:cid,type:'earn',amount:Math.round(amt*100)/100,points:pts,by:'staff',pay:pay});
+    save();render();toast(t('saleOk',{n:nf(pts),name:cc.name}));
+  }else if(k==='redeem'){
+    if(!d.get('cid')){toast(t('chooseFirst'),true);return}
+    doRedeem(d.get('cid'),d.get('rid'),'staff');
+  }else if(k==='validate'){
+    var code=String(d.get('code')).trim().toUpperCase();
+    var x=S.tx.filter(function(y){return y.type==='redeem'&&y.code===code})[0];
+    if(!x){toast(t('vNone'),true);return}
+    if(x.status==='used'){toast(t('vUsed'),true);return}
+    x.status='used';save();render();
+    toast(t('vOk',{reward:rn(rew(x.rid)),name:cust(x.cid).name}));
+  }else if(k==='addCustomer'){
+    var nm=String(d.get('name')).trim();if(!nm)return;
+    var rawPh=String(d.get('phone')||'').trim(),np='';
+    if(rawPh){np=cleanPhone(ui.region,rawPh);if(!np){setErr(f,'phone',t('errPhone',{ex:REG[ui.region].cc+' '+REG[ui.region].phoneEx}));return}}
+    S.customers.push({id:'c'+Date.now(),name:nm,email:'',phone:np,city:String(d.get('city')||'').trim(),joined:Date.now()});
+    save();render();toast(t('custAdded'));
+  }else if(k==='addReward'){
+    var n=String(d.get('name')).trim(),cost=parseFloat(d.get('cost'))||0;if(!n||!cost)return;
+    S.rewards.push({id:'r'+Date.now(),name:{en:n,fr:n,es:n,ar:n},cost:cost,value:parseFloat(d.get('value'))||0,type:d.get('type')==='discount'?'discount':'item',active:true});
+    save();render();toast(t('added'));
+  }
+});
+
+/* ---------- boot ---------- */
+function boot(){
+  var ks=enabledKeys();
+  if(ks.indexOf(ui.region)<0){var g=guessRegion();ui.region=ks.indexOf(g)>-1?g:ks[0]}
+  if(ui.sess){
+    var D0=(REG[ui.sess.region]&&REG[ui.sess.region].enabled!==false)?loadData(ui.sess.region,ui.sess.demo):null;
+    var okSess=D0&&((ui.sess.role==='business'&&D0.venue)||(ui.sess.role==='customer'&&D0.customers.some(function(c){return c.id===ui.sess.cid})));
+    if(okSess){S=D0;ui.region=ui.sess.region}else{ui.sess=null}
+  }
+  render();
+}
+loadConfig().then(function(cfg){try{applyConfig(cfg)}catch(e){}boot()});
+})();
+</script>
+<script>
+(function(){
+'use strict';
+var KEY='fidelo.admin.draft';
+var GATEWAYS=[['none','No gateway'],['stripe','Stripe'],['adyen','Adyen'],['checkoutcom','Checkout.com'],['paypal','PayPal'],['mollie','Mollie'],['worldline','Worldline'],['redsys','Redsys'],['payplug','PayPlug'],['cmi','CMI'],['payzone','Payzone'],['other','Other']];
+var BUILTIN={
+  ES:{name:{en:'Spain'},cur:'EUR',cc:'+34',rate:10,cities:['Madrid','Barcelona','Valencia','Sevilla','Málaga','Bilbao','Zaragoza','Granada','Alicante','Palma']},
+  MA:{name:{en:'Morocco'},cur:'MAD',cc:'+212',rate:1,cities:['Casablanca','Rabat','Marrakech','Fès','Tanger','Agadir','Meknès','Oujda','Kénitra','Tétouan','Salé','Essaouira']},
+  FR:{name:{en:'France'},cur:'EUR',cc:'+33',rate:10,cities:['Paris','Marseille','Lyon','Toulouse','Nice','Nantes','Bordeaux','Lille','Strasbourg','Montpellier']}
+};
+var ROOT=document.getElementById('adminRoot');var $=function(s){return ROOT.querySelector(s)};
+var esc=function(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
+var cfg=null,ui={edit:null,confirmDel:false};
+
+function payDefault(){return{cash:true,card:true,gateway:'none',gatewayName:''}}
+function defaults(){var c={version:1,countries:{}};Object.keys(BUILTIN).forEach(function(k){c.countries[k]={enabled:true,payments:payDefault(),cities:BUILTIN[k].cities.slice(),rate:BUILTIN[k].rate}});return c}
+function sane(c){
+  var d=defaults();
+  if(!c||typeof c!=='object'||!c.countries)return d;
+  Object.keys(d.countries).forEach(function(k){if(!c.countries[k])c.countries[k]=d.countries[k]});
+  Object.keys(c.countries).forEach(function(k){
+    var e=c.countries[k];
+    if(!e||typeof e!=='object'||!/^[A-Z]{2}$/.test(k)){delete c.countries[k];return}
+    var p=e.payments||{};
+    e.payments={cash:p.cash!==false,card:p.card!==false,gateway:String(p.gateway||'none'),gatewayName:String(p.gatewayName||'')};
+    if(!e.payments.cash&&!e.payments.card)e.payments.cash=true;
+    if(typeof e.enabled!=='boolean')e.enabled=true;
+    if(!Array.isArray(e.cities)||!e.cities.length)e.cities=(BUILTIN[k]?BUILTIN[k].cities:['-']).slice();
+    if(!(parseFloat(e.rate)>0))e.rate=BUILTIN[k]?BUILTIN[k].rate:1;
+  });
+  c.version=1;return c;
+}
+function info(code){var e=cfg.countries[code];return BUILTIN[code]||{name:e.name||{en:code},cur:e.cur,cc:e.cc}}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(cfg))}catch(e){}}
+function jsonText(){var o=JSON.parse(JSON.stringify(cfg));o.updated=new Date().toISOString();return JSON.stringify(o,null,2)}
+function refreshJson(){var t=$('#json');if(t)t.value=jsonText()}
+var toastTimer=null;
+function toast(msg,err){var el=$('#adminToast');el.textContent=msg;el.className=err?'err':'';el.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(function(){el.hidden=true},3200)}
+
+var LOGO='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></svg>';
+
+function gwSelect(code){
+  var e=cfg.countries[code],p=e.payments;
+  return '<div class="gw"><select data-f="gateway" data-c="'+code+'" aria-label="Gateway for '+esc(info(code).name.en||code)+'"'+(p.card?'':' disabled')+'>'+
+    GATEWAYS.map(function(g){return '<option value="'+g[0]+'"'+(p.gateway===g[0]?' selected':'')+'>'+g[1]+'</option>'}).join('')+'</select>'+
+    (p.card&&p.gateway==='other'?'<input class="in" data-f="gatewayName" data-c="'+code+'" value="'+esc(p.gatewayName)+'" placeholder="Gateway name" aria-label="Gateway name">':'')+'</div>';
+}
+function countryRows(){
+  return Object.keys(cfg.countries).map(function(code){
+    var e=cfg.countries[code],i=info(code),p=e.payments;
+    return '<tr'+(e.enabled?'':' class="off"')+'><td><b>'+esc(i.name.en||code)+'</b><div class="sub">'+code+' · '+esc(i.cur)+' · '+esc(i.cc)+'</div></td>'+
+      '<td><label class="tg"><input type="checkbox" data-f="cash" data-c="'+code+'"'+(p.cash?' checked':'')+'> Cash</label></td>'+
+      '<td><label class="tg"><input type="checkbox" data-f="card" data-c="'+code+'"'+(p.card?' checked':'')+'> Card</label></td>'+
+      '<td>'+gwSelect(code)+'</td>'+
+      '<td><label class="tg"><input type="checkbox" data-f="enabled" data-c="'+code+'"'+(e.enabled?' checked':'')+'> Live</label></td>'+
+      '<td><button type="button" class="btn ghost sm" data-aact="edit" data-v="'+code+'">Details</button></td></tr>';
+  }).join('');
+}
+function editForm(){
+  var code=ui.edit;if(!code)return '';
+  var isNew=code==='new',e=isNew?null:cfg.countries[code],custom=isNew||(e&&e.custom);
+  var i=isNew?{name:{},cur:'',cc:''}:info(code);
+  var nm=i.name||{};
+  var f='';
+  if(isNew)f+='<div class="field"><label for="fCode">Country code (2 letters)</label><input class="in" id="fCode" name="code" maxlength="2" placeholder="DZ" required style="text-transform:uppercase"></div>';
+  if(custom){
+    f+='<div class="field"><label for="fNen">Name in English</label><input class="in" id="fNen" name="n_en" value="'+esc(nm.en||'')+'" required></div>'+
+       '<div class="field"><label for="fNfr">Name in French</label><input class="in" id="fNfr" name="n_fr" value="'+esc(nm.fr||'')+'"></div>'+
+       '<div class="field"><label for="fNes">Name in Spanish</label><input class="in" id="fNes" name="n_es" value="'+esc(nm.es||'')+'"></div>'+
+       '<div class="field"><label for="fNar">Name in Arabic</label><input class="in" id="fNar" name="n_ar" value="'+esc(nm.ar||'')+'" dir="rtl"></div>'+
+       '<div class="field"><label for="fCur">Currency code</label><input class="in" id="fCur" name="cur" maxlength="3" value="'+esc(i.cur||'')+'" placeholder="DZD" required style="text-transform:uppercase"></div>'+
+       '<div class="field"><label for="fCc">Phone prefix</label><input class="in" id="fCc" name="cc" value="'+esc(i.cc||'')+'" placeholder="+213" required></div>'+
+       '<div class="field"><label for="fLen">Phone number length (without prefix)</label><input class="in" id="fLen" name="phoneLen" type="number" min="6" max="12" value="'+esc((e&&e.phoneLen)||9)+'" required></div>'+
+       '<div class="field"><label for="fFirst">Allowed first digits</label><input class="in" id="fFirst" name="phoneFirst" value="'+esc((e&&e.phoneFirst)||'')+'" placeholder="5-7"></div>'+
+       '<div class="field"><label for="fEx">Phone example</label><input class="in" id="fEx" name="phoneEx" value="'+esc((e&&e.phoneEx)||'')+'" placeholder="551 23 45 67"></div>'+
+       '<div class="field"><label for="fCoffee">Price of a coffee (local currency)</label><input class="in" id="fCoffee" name="coffee" type="number" min="0.1" step="any" value="'+esc((e&&e.coffee)||'')+'" placeholder="150" required></div>';
+  }
+  f+='<div class="field"><label for="fRate">Default points per 1 unit of currency</label><input class="in" id="fRate" name="rate" type="number" min="1" step="1" value="'+esc(e?e.rate:'1')+'" required></div>';
+  f+='<div class="field" style="grid-column:1/-1"><label for="fCities">Cities (separated by commas)</label><textarea class="in" id="fCities" name="cities" rows="3" required>'+esc(e?e.cities.join(', '):'')+'</textarea></div>';
+  if(isNew){
+    f+='<div class="field"><label class="check"><input type="checkbox" name="cash" checked> Cash</label></div>'+
+       '<div class="field"><label class="check"><input type="checkbox" name="card" checked> Card</label></div>'+
+       '<div class="field"><label for="fGw">Gateway</label><select id="fGw" name="gateway">'+GATEWAYS.map(function(g){return '<option value="'+g[0]+'">'+g[1]+'</option>'}).join('')+'</select></div>';
+  }
+  var title=isNew?'Add a country':'Details: '+esc(i.name.en||code);
+  return '<form class="panel" data-form="country"><div class="head"><h2>'+title+'</h2><button type="button" class="btn ghost sm" data-aact="closeEdit">Close</button></div><div class="formgrid">'+f+'</div>'+
+    '<div class="actions"><button class="btn" type="submit">'+(isNew?'Add country':'Save')+'</button>'+
+    (custom&&!isNew?'<button type="button" class="btn danger" data-aact="remove">'+(ui.confirmDel?'Click again to remove':'Remove country')+'</button>':'')+'</div></form>';
+}
+function render(){
+  $('#adminView').innerHTML=
+  '<header class="top"><div class="brand"><span class="mark">'+LOGO+'</span><div><b>Fidelo</b></div></div><div class="actions"><span class="chip">Admin</span><button type="button" class="btn ghost sm" data-aact="backApp">Back to the app</button></div></header>'+
+  '<div><h1>Countries and payments</h1><p class="sub">Changes apply in this browser right away. To apply them for every visitor, download config.json and upload it next to index.html.</p></div>'+
+  '<section class="panel"><div class="head"><h2>Countries</h2><button type="button" class="btn sm" data-aact="add">Add a country</button></div>'+
+  '<div class="tablewrap"><table><thead><tr><th>Country</th><th>Cash</th><th>Card</th><th>Gateway</th><th>Status</th><th></th></tr></thead><tbody id="rows">'+countryRows()+'</tbody></table></div></section>'+
+  editForm()+
+  '<section class="panel"><h2>Config file</h2><div class="actions">'+
+  '<button type="button" class="btn" data-aact="download">Download config.json</button>'+
+  '<button type="button" class="btn ghost" data-aact="copy">Copy</button>'+
+  '<button type="button" class="btn ghost" data-aact="backApp">Apply and open the app</button>'+
+  '<label class="btn ghost" for="cfgFile" style="margin:0;cursor:pointer">Load config.json</label><input id="cfgFile" type="file" accept=".json,application/json" hidden>'+
+  '<button type="button" class="btn danger" data-aact="reset">Reset to defaults</button></div>'+
+  '<label class="sr" for="json" style="position:absolute;left:-9999px">config.json</label><textarea id="json" readonly spellcheck="false"></textarea></section>';
+  refreshJson();
+}
+
+/* ---------- events ---------- */
+function liveCount(){return Object.keys(cfg.countries).filter(function(k){return cfg.countries[k].enabled}).length}
+ROOT.addEventListener('change',function(e){
+  var el=e.target;
+  if(el.id==='cfgFile'){
+    var f=el.files&&el.files[0];if(!f)return;
+    var r=new FileReader();
+    r.onload=function(){try{cfg=sane(JSON.parse(String(r.result)));persist();render();toast('Loaded.')}catch(x){toast('This file is not a valid config.json.',true)}};
+    r.readAsText(f);return;
+  }
+  var code=el.dataset&&el.dataset.c,fld=el.dataset&&el.dataset.f;
+  if(!code||!fld||!cfg.countries[code])return;
+  var c=cfg.countries[code],p=c.payments;
+  if(fld==='cash'||fld==='card'){
+    var other=fld==='cash'?'card':'cash';
+    if(!el.checked&&!p[other]){el.checked=true;toast('Keep at least one payment method.',true);return}
+    p[fld]=el.checked;persist();render();
+  }else if(fld==='gateway'){p.gateway=el.value;persist();render()}
+  else if(fld==='gatewayName'){p.gatewayName=el.value.slice(0,40);persist();refreshJson()}
+  else if(fld==='enabled'){
+    if(!el.checked&&liveCount()<=1){el.checked=true;toast('At least one country must stay live.',true);return}
+    c.enabled=el.checked;persist();render();
+  }
+});
+ROOT.addEventListener('input',function(e){if(e.target.dataset&&e.target.dataset.f==='gatewayName'){var c=cfg.countries[e.target.dataset.c];if(c){c.payments.gatewayName=e.target.value.slice(0,40);persist();refreshJson()}}});
+ROOT.addEventListener('click',function(e){
+  var el=e.target.closest('[data-aact]');if(!el)return;
+  var a=el.dataset.aact;
+  if(a!=='remove')ui.confirmDel=false;
+  if(a==='edit'){ui.edit=el.dataset.v;render();var f=$('form[data-form=country]');if(f)f.scrollIntoView({block:'nearest'})}
+  else if(a==='backApp'){location.hash='';location.reload()}
+  else if(a==='add'){ui.edit='new';render();var g=$('form[data-form=country]');if(g)g.scrollIntoView({block:'nearest'})}
+  else if(a==='closeEdit'){ui.edit=null;render()}
+  else if(a==='remove'){
+    if(!ui.confirmDel){ui.confirmDel=true;render();return}
+    if(liveCount()<=1&&cfg.countries[ui.edit].enabled){toast('At least one country must stay live.',true);ui.confirmDel=false;render();return}
+    delete cfg.countries[ui.edit];ui.edit=null;ui.confirmDel=false;persist();render();toast('Removed.');
+  }
+  else if(a==='download'){
+    try{
+      var blob=new Blob([jsonText()],{type:'application/json'}),u=URL.createObjectURL(blob),l=document.createElement('a');
+      l.href=u;l.download='config.json';document.body.appendChild(l);l.click();document.body.removeChild(l);setTimeout(function(){URL.revokeObjectURL(u)},2000);
+    }catch(x){toast('Download is not available here. Use Copy.',true)}
+  }
+  else if(a==='copy'){
+    var t=$('#json');
+    var fallback=function(){t.select();try{document.execCommand('copy');toast('Copied.')}catch(x){toast('Select the text and copy it.',true)}};
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t.value).then(function(){toast('Copied.')},fallback)}else fallback();
+  }
+  else if(a==='reset'){
+    if(!ui.confirmReset){ui.confirmReset=true;el.textContent='Click again to reset';return}
+    ui.confirmReset=false;cfg=defaults();persist();ui.edit=null;render();toast('Reset.');
+  }
+});
+function invalid(f,name,msg){var el=f.elements[name];if(el){el.setAttribute('aria-invalid','true');el.focus()}toast(msg,true)}
+ROOT.addEventListener('submit',function(e){
+  e.preventDefault();
+  var f=e.target;if(f.dataset.form!=='country')return;
+  var d=new FormData(f),k=ui.edit;
+  Array.prototype.forEach.call(f.elements,function(el){el.removeAttribute&&el.removeAttribute('aria-invalid')});
+  var cities=String(d.get('cities')).split(',').map(function(s){return s.trim()}).filter(Boolean);
+  if(!cities.length)return invalid(f,'cities','Add at least one city.');
+  var rate=parseFloat(d.get('rate'));if(!(rate>0))return invalid(f,'rate','Points per unit must be 1 or more.');
+  var isNew=k==='new',e0=isNew?null:cfg.countries[k];
+  if(isNew||(e0&&e0.custom)){
+    var code=isNew?String(d.get('code')).toUpperCase().trim():k;
+    if(!/^[A-Z]{2}$/.test(code))return invalid(f,'code','Use a 2-letter country code.');
+    if(isNew&&cfg.countries[code])return invalid(f,'code','This country already exists.');
+    var cur=String(d.get('cur')).toUpperCase().trim();
+    if(!/^[A-Z]{3}$/.test(cur))return invalid(f,'cur','Use a 3-letter currency code, for example DZD.');
+    try{new Intl.NumberFormat('en',{style:'currency',currency:cur})}catch(x){return invalid(f,'cur','This currency code is not recognised.')}
+    var cc=String(d.get('cc')).trim();if(cc&&cc[0]!=='+')cc='+'+cc;
+    if(!/^\+\d{1,4}$/.test(cc))return invalid(f,'cc','Use a phone prefix like +213.');
+    var len=parseInt(d.get('phoneLen'),10);if(!(len>=6&&len<=12))return invalid(f,'phoneLen','Length must be between 6 and 12.');
+    var first=String(d.get('phoneFirst')).trim();
+    if(first){if(!/^[0-9-]+$/.test(first))return invalid(f,'phoneFirst','Use digits or a range like 5-7.');try{new RegExp('['+first+']')}catch(x){return invalid(f,'phoneFirst','Use digits or a range like 5-7.')}}
+    var coffee=parseFloat(d.get('coffee'));if(!(coffee>0))return invalid(f,'coffee','Enter the usual price of a coffee.');
+    var name={en:String(d.get('n_en')).trim()};
+    ['fr','es','ar'].forEach(function(l){var v=String(d.get('n_'+l)).trim();if(v)name[l]=v});
+    if(!name.en)return invalid(f,'n_en','English name is required.');
+    var entry=e0||{enabled:true,payments:payDefault()};
+    entry.custom=true;entry.name=name;entry.cur=cur;entry.cc=cc;entry.phoneLen=len;entry.phoneFirst=first;entry.phoneEx=String(d.get('phoneEx')).trim();entry.coffee=coffee;entry.cities=cities;entry.rate=rate;
+    if(isNew){
+      var cash=!!d.get('cash'),card=!!d.get('card');
+      if(!cash&&!card)return invalid(f,'cash','Choose cash, card or both.');
+      entry.payments={cash:cash,card:card,gateway:card?String(d.get('gateway')):'none',gatewayName:''};
+      cfg.countries[code]=entry;
+    }
+    ui.edit=null;persist();render();toast(isNew?'Country added.':'Saved.');
+  }else{
+    e0.cities=cities;e0.rate=rate;ui.edit=null;persist();render();toast('Saved.');
+  }
+});
+
+/* ---------- start ---------- */
+function start(c){cfg=sane(c);persist();render()}
+function openAdmin(){
+  var on=location.hash==='#admin';
+  ROOT.hidden=!on;var appEl=document.getElementById('app');if(appEl)appEl.hidden=on;
+  if(!on||cfg)return;
+  var draft=null;
+  try{draft=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){}
+  if(draft&&draft.countries){start(draft)}
+  else if(window.fetch){fetch('config.json',{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).catch(function(){return null}).then(start)}
+  else start(null);
+}
+window.addEventListener('hashchange',openAdmin);openAdmin();
+})();
+</script>
+
+</body>
+</html>
